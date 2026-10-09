@@ -1,1 +1,28 @@
-<p>sidebar works!</p>
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-logo">L</div>
+    <div class="brand-text">
+      <h2>LCC</h2>
+      <p>WAREHOUSE</p>
+    </div>
+  </div>
+
+  <nav class="menu">
+    <button
+      *ngFor="let item of menuItems"
+      class="menu-item"
+      [class.active]="activeItem === item.name"
+      (click)="selectMenu(item.name)"
+    >
+      <span class="menu-icon">{{ item.icon }}</span>
+      <span>{{ item.name }}</span>
+    </button>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <button class="menu-item logout" (click)="selectMenu('Logout')">
+      <span class="menu-icon">🚪</span>
+      <span>Logout</span>
+    </button>
+  </div>
+</aside>

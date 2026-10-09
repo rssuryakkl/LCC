@@ -1,1 +1,79 @@
-<p>dashboard works!</p>
+<div class="dashboard-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content">
+    <header class="topbar">
+      <div class="breadcrumb">Workspace <span>›</span> Dashboard</div>
+      <div class="user-label">LCC Warehouse Management</div>
+    </header>
+
+    <section class="page-heading">
+      <div>
+        <p class="eyebrow">LCC WAREHOUSE</p>
+        <h1>Dashboard</h1>
+        <p class="subtitle">
+          Monitor your warehouse stock and daily activities.
+        </p>
+      </div>
+    </section>
+
+    <section class="stats-grid">
+      <article class="stat-card" *ngFor="let stat of stats">
+        <div class="stat-top">
+          <span>{{ stat.title }}</span>
+          <span class="stat-icon">{{ stat.icon }}</span>
+        </div>
+        <h2>{{ stat.value }}</h2>
+        <p>Warehouse overview</p>
+      </article>
+    </section>
+
+    <section class="content-grid">
+      <article class="panel stock-panel">
+        <h2>Stock Overview</h2>
+        <p>Summary of your current warehouse inventory.</p>
+
+        <div class="stock-placeholder">
+          <div class="stock-bar bar-one"></div>
+          <div class="stock-bar bar-two"></div>
+          <div class="stock-bar bar-three"></div>
+          <div class="stock-bar bar-four"></div>
+          <div class="stock-bar bar-five"></div>
+        </div>
+
+        <div class="chart-labels">
+          <span>Mon</span><span>Tue</span><span>Wed</span>
+          <span>Thu</span><span>Fri</span>
+        </div>
+      </article>
+
+      <article class="panel activity-panel">
+        <h2>Recent Activity</h2>
+
+        <div class="activity-item">
+          <span class="activity-dot"></span>
+          <div>
+            <strong>Stock received</strong>
+            <p>New inventory added to the warehouse.</p>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <span class="activity-dot"></span>
+          <div>
+            <strong>Product updated</strong>
+            <p>Inventory information updated.</p>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <span class="activity-dot"></span>
+          <div>
+            <strong>Stock checked</strong>
+            <p>Warehouse stock overview reviewed.</p>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+</div>
