@@ -91,7 +91,10 @@
 .logout:hover {
   background: #fff2b2;
 }
-
+.menu-item {
+  text-decoration: none;
+  box-sizing: border-box;
+}
 @media (max-width: 600px) {
   .sidebar {
     width: 200px;

@@ -8,19 +8,20 @@
   </div>
 
   <nav class="menu">
-    <button
+    <a
       *ngFor="let item of menuItems"
+      [routerLink]="item.route"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
       class="menu-item"
-      [class.active]="activeItem === item.name"
-      (click)="selectMenu(item.name)"
     >
       <span class="menu-icon">{{ item.icon }}</span>
       <span>{{ item.name }}</span>
-    </button>
+    </a>
   </nav>
 
   <div class="sidebar-bottom">
-    <button class="menu-item logout" (click)="selectMenu('Logout')">
+    <button class="menu-item logout" type="button">
       <span class="menu-icon">🚪</span>
       <span>Logout</span>
     </button>
