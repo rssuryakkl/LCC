@@ -1,79 +1,164 @@
-<div class="dashboard-layout">
-  <app-sidebar></app-sidebar>
 
-  <main class="main-content">
-    <header class="topbar">
-      <div class="breadcrumb">Workspace <span>›</span> Dashboard</div>
-      <div class="user-label">LCC Warehouse Management</div>
-    </header>
+<div class="dashboard-page">
 
-    <section class="page-heading">
-      <div>
-        <p class="eyebrow">LCC WAREHOUSE</p>
-        <h1>Dashboard</h1>
-        <p class="subtitle">
-          Monitor your warehouse stock and daily activities.
-        </p>
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="breadcrumb">
+      <span>Workspace</span>
+      <span class="breadcrumb-arrow">›</span>
+      <strong>Dashboard</strong>
+    </div>
+    <div class="header-right">
+      <span class="warehouse-label">LCC Warehouse Management</span>
+    </div>
+    
+  </header>
+
+  <!-- Page introduction -->
+  <section class="page-intro">
+    <span class="eyebrow">LCC WAREHOUSE</span>
+    <h1>Dashboard</h1>
+    <p>Monitor your warehouse stock and daily activities.</p>
+  </section>
+
+  <!-- Summary cards -->
+  <section class="stats-grid">
+    <article
+      class="stat-card"
+      *ngFor="let stat of stats"
+      [ngClass]="stat.color">
+
+      <div class="stat-top">
+        <span class="stat-title">{{ stat.title }}</span>
+        <span class="stat-icon">{{ stat.icon }}</span>
       </div>
-    </section>
 
-    <section class="stats-grid">
-      <article class="stat-card" *ngFor="let stat of stats">
-        <div class="stat-top">
-          <span>{{ stat.title }}</span>
-          <span class="stat-icon">{{ stat.icon }}</span>
+      <h2>{{ stat.value }}</h2>
+      <p>{{ stat.description }}</p>
+    </article>
+  </section>
+
+  <!-- Charts and activities -->
+  <section class="dashboard-grid">
+
+    <!-- Stock movement chart -->
+    <article class="panel chart-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Stock Movement</h2>
+          <p>Weekly stock received and distributed</p>
         </div>
-        <h2>{{ stat.value }}</h2>
-        <p>Warehouse overview</p>
-      </article>
-    </section>
+        <span class="panel-icon">📈</span>
+      </div>
 
-    <section class="content-grid">
-      <article class="panel stock-panel">
-        <h2>Stock Overview</h2>
-        <p>Summary of your current warehouse inventory.</p>
+      <div class="chart-legend">
+        <span><i class="legend-dot received"></i> Received</span>
+        <span><i class="legend-dot distributed"></i> Distributed</span>
+      </div>
 
-        <div class="stock-placeholder">
-          <div class="stock-bar bar-one"></div>
-          <div class="stock-bar bar-two"></div>
-          <div class="stock-bar bar-three"></div>
-          <div class="stock-bar bar-four"></div>
-          <div class="stock-bar bar-five"></div>
+      <div class="chart">
+        <div class="chart-y-axis">
+          <span>120</span>
+          <span>90</span>
+          <span>60</span>
+          <span>30</span>
+          <span>0</span>
         </div>
 
-        <div class="chart-labels">
-          <span>Mon</span><span>Tue</span><span>Wed</span>
-          <span>Thu</span><span>Fri</span>
-        </div>
-      </article>
+        <div class="chart-body">
+          <div class="chart-grid-lines">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
 
-      <article class="panel activity-panel">
-        <h2>Recent Activity</h2>
-
-        <div class="activity-item">
-          <span class="activity-dot"></span>
-          <div>
-            <strong>Stock received</strong>
-            <p>New inventory added to the warehouse.</p>
+          <div class="chart-columns">
+            <div class="day-column" *ngFor="let item of stockMovement">
+              <div class="bars">
+                <div
+                  class="bar received"
+                  [style.height.%]="getBarHeight(item.received)"
+                  [title]="'Received: ' + item.received">
+                </div>
+                <div
+                  class="bar distributed"
+                  [style.height.%]="getBarHeight(item.distributed)"
+                  [title]="'Distributed: ' + item.distributed">
+                </div>
+              </div>
+              <span class="day-label">{{ item.day }}</span>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div class="activity-item">
-          <span class="activity-dot"></span>
-          <div>
-            <strong>Product updated</strong>
-            <p>Inventory information updated.</p>
+      <div class="chart-footer">
+        <span>Weekly overview</span>
+        <span>Sample data</span>
+      </div>
+    </article>
+
+    <!-- Recent activity -->
+    <article class="panel activity-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Recent Activity</h2>
+          <p>Latest warehouse operations</p>
+        </div>
+        <span class="panel-icon">🕒</span>
+      </div>
+
+      <div class="activity-list">
+        <div class="activity-item" *ngFor="let activity of activities">
+          <div class="activity-icon">{{ activity.icon }}</div>
+          <div class="activity-details">
+            <h3>{{ activity.title }}</h3>
+            <p>{{ activity.description }}</p>
+            <span>{{ activity.time }}</span>
           </div>
         </div>
+      </div>
+    </article>
 
-        <div class="activity-item">
-          <span class="activity-dot"></span>
-          <div>
-            <strong>Stock checked</strong>
-            <p>Warehouse stock overview reviewed.</p>
-          </div>
-        </div>
-      </article>
-    </section>
-  </main>
+  </section>
+
+  <!-- Low stock table -->
+  <section class="panel low-stock-panel">
+    <div class="panel-header">
+      <div>
+        <h2>Low Stock Alerts</h2>
+        <p>Products that may need restocking</p>
+      </div>
+      <span class="alert-count">{{ lowStockProducts.length }} items</span>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Category</th>
+            <th>Current Stock</th>
+            <th>Minimum Stock</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let product of lowStockProducts">
+            <td class="product-name">{{ product.name }}</td>
+            <td>{{ product.category }}</td>
+            <td>{{ product.stock }} units</td>
+            <td>{{ product.minimum }} units</td>
+            <td>
+              <span class="status-badge">Restock Needed</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
 </div>

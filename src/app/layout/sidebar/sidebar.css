@@ -13,6 +13,24 @@
   z-index: 100;
 }
 
+.brand-logo {
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.brand-logo img {
+  width: 120%;
+  height: 120%;
+  object-fit: contain;
+}
+
 .brand {
   display: flex;
   align-items: center;
