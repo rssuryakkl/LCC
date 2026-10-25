@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/layout/main-layout/main-layout.css"],
+  "sourcesContent": ["\r\n.app-layout {\r\n  min-height: 100vh;\r\n  width: 100%;\r\n  background: #ffffff;\r\n  display: flex;\r\n  flex-direction: column;\r\n}\r\n\r\n.page-content {\r\n  margin-left: 0;\r\n  padding: 0;\r\n  min-height: 80vh;\r\n  min-width: 0;\r\n  width: 100%;\r\n  background: #ffffff;\r\n  flex: 1;\r\n}\r\n\r\n@media (max-width: 600px) {\r\n  .page-content {\r\n    margin-left: 0;\r\n    width: 100%;\r\n  }\r\n}"],
+  "mappings": ";AACA,CAAC;AACC,cAAY;AACZ,SAAO;AACP,cAAY;AACZ,WAAS;AACT,kBAAgB;AAClB;AAEA,CAAC;AACC,eAAa;AACb,WAAS;AACT,cAAY;AACZ,aAAW;AACX,SAAO;AACP,cAAY;AACZ,QAAM;AACR;AAEA,QAAO,WAAY;AACjB,GAXD;AAYG,iBAAa;AACb,WAAO;AACT;AACF;",
+  "names": []
+}
