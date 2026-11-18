@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 export type ReportEventType =
@@ -7,12 +8,14 @@ export type ReportEventType =
   | 'STOCK_TRANSFERRED'
   | 'PRODUCT_UPDATED'
   | 'PRODUCT_DELETED'
-  | 'LCC_TRANSFER_DELETED';
+  | 'LCC_TRANSFER_DELETED'
+  | 'LCC_STOCK_UPDATED'
+  | 'DISTRIBUTION';
 
 export interface ReportRecord {
-  id: string;              // e.g. "RPT-1001"
-  date: string;            // e.g. "2026-10-15" or "15-10-2026"
-  time: string;            // e.g. "09:15:30 AM"
+  id: string;              // e.g. "RPT-0001-123"
+  date: string;            // e.g. "2026-11-18"
+  time: string;            // e.g. "03:15:30 PM"
   productId: string;       // e.g. "SA_102"
   productName: string;     // e.g. "Saree"
   eventType: ReportEventType;
@@ -27,42 +30,70 @@ export interface ReportRecord {
 }
 
 const STORAGE_KEY = 'lcc_reports_records';
-const CLEANUP_KEY = 'lcc_reports_history_reset_v1';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReportsService {
-  private recordsSubject = new BehaviorSubject<ReportRecord[]>(this.loadInitialRecords());
+  private recordsSubject = new BehaviorSubject<ReportRecord[]>(this.loadCachedRecords());
   records$: Observable<ReportRecord[]> = this.recordsSubject.asObservable();
 
-  constructor() {
-    // Automatic demo data seeding removed so report history starts completely clean
+  private get baseUrl(): string {
+    const host = typeof window !== 'undefined' && window.location.hostname ? window.location.hostname : 'localhost';
+    return `http://${host}:5000/api/reports`;
   }
 
-  private loadInitialRecords(): ReportRecord[] {
+  constructor(private http: HttpClient) {
+    this.fetchReportsFromBackend();
+  }
+
+  private loadCachedRecords(): ReportRecord[] {
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
-        // One-time cleanup of previous mock/seeded demo report history
-        if (!localStorage.getItem(CLEANUP_KEY)) {
-          localStorage.removeItem(STORAGE_KEY);
-          localStorage.setItem(CLEANUP_KEY, 'true');
-          return [];
-        }
-
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const parsed = JSON.parse(saved);
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
           if (Array.isArray(parsed)) {
-            // Filter out any legacy dummy/mock seed records
-            return parsed.filter((r: ReportRecord) => !r.id?.startsWith('RPT-INIT-'));
+            return parsed;
           }
         }
       }
     } catch (e) {
-      console.error('Failed to load reports records from localStorage', e);
+      console.error('Failed to load cached reports from localStorage', e);
     }
     return [];
+  }
+
+  fetchReportsFromBackend(): void {
+    this.http.get<{ success: boolean; count: number; reports: any[] }>(this.baseUrl).subscribe({
+      next: (res) => {
+        if (res && res.success && Array.isArray(res.reports)) {
+          const loaded: ReportRecord[] = res.reports.map((r: any) => ({
+            id: r.recordId || r._id,
+            date: r.date,
+            time: r.time,
+            productId: r.productId,
+            productName: r.productName,
+            eventType: r.eventType,
+            eventTitle: r.eventTitle,
+            quantityChange: Number(r.quantityChange) || 0,
+            previousStock: Number(r.previousStock) || 0,
+            newStock: Number(r.newStock) || 0,
+            location: r.location || 'Vadalur',
+            updatedBy: r.updatedBy || 'System',
+            remarks: r.remarks || '',
+            timestamp: r.timestamp || (r.createdAt ? new Date(r.createdAt).getTime() : Date.now())
+          }));
+
+          // Sort newest first
+          loaded.sort((a, b) => b.timestamp - a.timestamp);
+          this.saveRecords(loaded);
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load reports from backend:', err);
+      }
+    });
   }
 
   getRecords(): ReportRecord[] {
@@ -105,7 +136,7 @@ export class ReportsService {
   }
 
   /**
-   * Record every single data entry row-by-row
+   * Record every single data entry row-by-row in MongoDB and state
    */
   recordEntry(entry: {
     productId: string;
@@ -124,20 +155,23 @@ export class ReportsService {
     const prev = entry.previousStock ?? 0;
     const newStk = entry.newStock ?? Math.max(0, prev + entry.quantityChange);
 
-    const titleMap: Record<ReportEventType, string> = {
+    const titleMap: Record<string, string> = {
       STOCK_RECEIVED: 'Stock Received',
       PRODUCT_ADDED: 'Product Added',
       STOCK_TRANSFERRED: 'Stock Transferred to LCC',
       PRODUCT_UPDATED: 'Product Updated',
       PRODUCT_DELETED: 'Product Deleted',
-      LCC_TRANSFER_DELETED: 'LCC Transfer Removed'
+      LCC_TRANSFER_DELETED: 'LCC Transfer Removed',
+      LCC_STOCK_UPDATED: 'LCC Stock Updated',
+      DISTRIBUTION: 'Transferred to Distribution'
     };
 
+    const recordId = this.generateRecordId();
     const newRecord: ReportRecord = {
-      id: this.generateRecordId(),
+      id: recordId,
       date: entry.date || this.getFormattedDate(),
       time: entry.time || this.getFormattedTime(),
-      productId: entry.productId || 'N/A',
+      productId: (entry.productId || 'N/A').toUpperCase(),
       productName: entry.productName || 'Unknown Product',
       eventType: entry.eventType,
       eventTitle: entry.eventTitle || titleMap[entry.eventType] || 'Inventory Action',
@@ -150,9 +184,20 @@ export class ReportsService {
       timestamp: Date.now()
     };
 
-    // Insert at the beginning so newest records appear first
+    // Update state and cache optimistically
     const updated = [newRecord, ...this.recordsSubject.value];
     this.saveRecords(updated);
+
+    // Save asynchronously to backend MongoDB
+    this.http.post<{ success: boolean; report: any }>(this.baseUrl, newRecord).subscribe({
+      next: (res) => {
+        // Successfully persisted to MongoDB
+      },
+      error: (err) => {
+        console.error('Failed to persist report entry to backend MongoDB:', err);
+      }
+    });
+
     return newRecord;
   }
 
@@ -162,6 +207,11 @@ export class ReportsService {
   deleteRecord(id: string): void {
     const updated = this.recordsSubject.value.filter(r => r.id !== id);
     this.saveRecords(updated);
+
+    this.http.delete(`${this.baseUrl}/${encodeURIComponent(id)}`).subscribe({
+      next: () => {},
+      error: (err) => console.error('Failed to delete report on backend:', err)
+    });
   }
 
   /**
@@ -176,6 +226,11 @@ export class ReportsService {
       console.error('Failed to clear reports from localStorage', e);
     }
     this.recordsSubject.next([]);
+
+    this.http.delete(this.baseUrl).subscribe({
+      next: () => {},
+      error: (err) => console.error('Failed to clear reports on backend:', err)
+    });
   }
 
   /**

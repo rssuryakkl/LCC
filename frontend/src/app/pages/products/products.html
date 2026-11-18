@@ -248,7 +248,7 @@
             <option value="" disabled>Select Product ID</option>
             <option
               *ngFor="let product of products"
-              [value]="product.id"
+              [value]="product.productId || product.id"
               [disabled]="product.quantity < 1"
             >
               {{ product.productId + " - " + product.name }}
@@ -271,7 +271,7 @@
             <option value="" disabled>Select Product Name</option>
             <option
               *ngFor="let product of products"
-              [value]="product.id"
+              [value]="product.productId || product.id"
               [disabled]="product.quantity < 1"
             >
               {{ product.name + " - " + product.productId }}
@@ -630,7 +630,7 @@
             class="product-select-dropdown"
           >
             <option [ngValue]="null" disabled selected>-- Select an existing product to restock --</option>
-            <option *ngFor="let prod of products" [ngValue]="prod.id">
+            <option *ngFor="let prod of products" [ngValue]="prod.productId || prod.id">
               {{ prod.name }} ({{ prod.productId }}) &mdash; Available: {{ prod.quantity }} PCS &bull; {{ prod.location || 'Warehouse' }}
             </option>
           </select>

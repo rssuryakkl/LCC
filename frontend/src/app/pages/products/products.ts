@@ -1,12 +1,14 @@
 
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LccService } from '../../services/lcc.service';
 import { ReportsService } from '../../services/reports.service';
+import { ProductService, Product as ApiProduct } from '../../services/product.service';
 
 interface Product {
-  id: number;
+  _id?: string;
+  id: any;
   productId: string;
   name: string;
   quantity: number;
@@ -19,7 +21,7 @@ interface Product {
 }
 
 interface ProductFormData {
-  id: number;
+  id: any;
   productId: string;
   name: string;
   quantity: number | null;
@@ -50,7 +52,7 @@ export interface AppModalDialog {
   templateUrl: './products.html',
   styleUrl: './products.css'
 })
-export class Products {
+export class Products implements OnInit {
 
   // ==================== PRODUCTS ====================
 
@@ -76,13 +78,13 @@ export class Products {
   showTransferForm = false;
   showReceiveStockModal = false;
   selectedReceiveProduct: Product | null = null;
-  selectedReceiveProductId: number | null = null;
+  selectedReceiveProductId: any = null;
   receiveStockForm = {
     quantity: null as number | null,
     updatedBy: '',
     date: ''
   };
-  editingId: number | null = null;
+  editingId: any = null;
   isCustomProductId = false;
 
   // Generic in-app dialog
@@ -158,125 +160,56 @@ export class Products {
 
   constructor(
     private lccService: LccService,
-    private reportsService: ReportsService
-  ) {
+    private reportsService: ReportsService,
+    private productService: ProductService,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
+    // Clean legacy storage keys
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.removeItem('warehouse_products');
+      localStorage.removeItem('lcc_transferred_items');
+      localStorage.removeItem('lcc_distribution_records');
+    }
     this.loadProducts();
   }
 
-  private loadProducts(): void {
-    try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        const saved = localStorage.getItem('warehouse_products');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            const mapped = parsed.map((p: any, idx: number) => {
-              const safeName = (p.name || 'Product').trim();
-              const prefix = this.getPrefixFromName(safeName);
-              const idNum = p.productId ? parseInt(String(p.productId).replace(/\D/g, ''), 10) : (101 + idx);
-              const safeProductId = p.productId ? String(p.productId).trim() : `${prefix}_${isNaN(idNum) ? 101 + idx : idNum}`;
-              const safeQty = Number(p.quantity);
+  loadProducts(): void {
+    this.productService.getProducts().subscribe({
+      next: (res) => {
+        if (res.success && Array.isArray(res.products)) {
+          this.products = res.products.map((p: any) => ({
+            _id: p._id,
+            id: p._id || p.productId,
+            productId: p.productId,
+            name: p.name,
+            quantity: Number(p.quantity) || 0,
+            receivedDate: p.receivedDate || this.getTodayDate(),
+            sponsorName: p.sponsorName || '',
+            image: p.image || '',
+            location: p.location || 'Vadalur',
+            updatedBy: p.updatedBy || p.addedBy || 'Admin',
+            addedBy: p.addedBy || p.updatedBy || 'Admin'
+          }));
 
-              return {
-                id: p.id ? Number(p.id) : (Date.now() + idx),
-                productId: safeProductId,
-                name: safeName,
-                quantity: !isNaN(safeQty) && safeQty >= 0 ? safeQty : 0,
-                receivedDate: p.receivedDate || this.getTodayDate(),
-                sponsorName: p.sponsorName || '',
-                image: p.image || '',
-                location: p.location || 'Vadalur',
-                updatedBy: p.updatedBy || p.addedBy || 'Admin',
-                addedBy: p.addedBy || p.updatedBy || 'Admin'
-              };
-            });
-
-            // Consolidate any existing duplicates by product name (e.g. SA_104 and SA_106 Sarees)
-            const consolidated = this.consolidateDuplicateProducts(mapped);
-            // Automatically remove any products where available stock is 0 or less
-            this.products = consolidated.filter(p => (Number(p.quantity) || 0) > 0);
-            if (this.products.length !== parsed.length) {
-              this.saveProducts();
-            }
-
-            const maxId = this.products.reduce((max: number, p: Product) => {
-              const num = parseInt(p.productId?.replace(/\D/g, '') || '0', 10);
-              return Math.max(max, isNaN(num) ? 0 : num);
-            }, 101);
-            this.nextProductId = maxId + 1;
-            return;
-          }
+          const maxId = this.products.reduce((max: number, p: Product) => {
+            const num = parseInt(p.productId?.replace(/\D/g, '') || '0', 10);
+            return Math.max(max, isNaN(num) ? 0 : num);
+          }, 101);
+          this.nextProductId = maxId + 1;
         }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to load products from backend API:', err);
+        this.cdr.detectChanges();
       }
-    } catch (e) {
-      console.error('Failed to load products from localStorage', e);
-    }
-  }
-
-  private consolidateDuplicateProducts(products: Product[]): Product[] {
-    const grouped = new Map<string, Product[]>();
-
-    for (const p of products) {
-      const nameKey = (p.name || '').trim().toLowerCase();
-      if (!nameKey) continue;
-
-      if (!grouped.has(nameKey)) {
-        grouped.set(nameKey, []);
-      }
-      grouped.get(nameKey)!.push(p);
-    }
-
-    const consolidated: Product[] = [];
-
-    for (const [nameKey, list] of grouped.entries()) {
-      if (list.length === 1) {
-        consolidated.push(list[0]);
-      } else {
-        // Multiple entries for same product name exist (e.g. SA_104 with 90 and SA_106 with 88)
-        // Sort to determine earliest/primary record
-        list.sort((a, b) => {
-          const numA = parseInt(a.productId?.replace(/\D/g, '') || String(a.id || 0), 10);
-          const numB = parseInt(b.productId?.replace(/\D/g, '') || String(b.id || 0), 10);
-          return (isNaN(numA) ? 0 : numA) - (isNaN(numB) ? 0 : numB);
-        });
-
-        const earliest = list[0];
-        const totalQty = list.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
-
-        // Find latest update for date and updatedBy
-        const sortedByDate = [...list].sort((a, b) => {
-          const timeA = new Date(a.receivedDate || 0).getTime() || a.id || 0;
-          const timeB = new Date(b.receivedDate || 0).getTime() || b.id || 0;
-          return timeB - timeA;
-        });
-        const latest = sortedByDate[0];
-
-        consolidated.push({
-          ...earliest,
-          name: latest.name || earliest.name,
-          quantity: totalQty,
-          receivedDate: latest.receivedDate || earliest.receivedDate,
-          updatedBy: latest.updatedBy || earliest.updatedBy,
-          location: latest.location || earliest.location,
-          sponsorName: latest.sponsorName || earliest.sponsorName || '',
-          image: latest.image || earliest.image || ''
-        });
-      }
-    }
-
-    return consolidated;
+    });
   }
 
   private saveProducts(): void {
-    try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        // Exclude products with 0 or negative available stock
-        this.products = this.products.filter(p => (Number(p.quantity) || 0) > 0);
-        localStorage.setItem('warehouse_products', JSON.stringify(this.products));
-      }
-    } catch (e) {
-      console.error('Failed to save products to localStorage', e);
-    }
+    // Real product persistence is handled via MongoDB backend APIs.
   }
 
   getPrefixFromName(name: string): string {
@@ -372,9 +305,11 @@ export class Products {
     if (!this.transferForm.productId) {
       return undefined;
     }
-    const targetId = Number(this.transferForm.productId);
-    return this.products.find(
-      product => product.id === targetId
+    const target = String(this.transferForm.productId).trim().toLowerCase();
+    return this.products.find(product =>
+      (product.productId && String(product.productId).trim().toLowerCase() === target) ||
+      (product.id && String(product.id).trim().toLowerCase() === target) ||
+      (product._id && String(product._id).trim().toLowerCase() === target)
     );
   }
 
@@ -432,57 +367,61 @@ export class Products {
       return;
     }
 
-    // Reduce warehouse stock, or remove product entirely if stock reaches 0
-    const remainingQty = product.quantity - quantity;
-    if (remainingQty <= 0) {
-      this.products = this.products.filter(item => item.id !== product.id);
-    } else {
-      this.products = this.products.map(item =>
-        item.id === product.id
-          ? { ...item, quantity: remainingQty }
-          : item
-      );
-    }
-    this.saveProducts();
-
-    // Add transfer record to LCC
-    this.lccService.addTransfer({
-      productId: product.productId || '',
-      name: product.name,
+    this.productService.moveToLcc({
+      productId: product.productId,
       quantity,
-      date: this.transferForm.date,
       switchedBy,
-      location: product.location || 'Not assigned'
+      date: this.transferForm.date,
+      location: product.location || 'LCC'
+    }).subscribe({
+      next: (res) => {
+        this.loadProducts();
+
+        // Add transfer record to LCC
+        this.lccService.addTransfer({
+          productId: product.productId || '',
+          name: product.name,
+          quantity,
+          date: this.transferForm.date,
+          switchedBy,
+          location: product.location || 'Not assigned'
+        });
+
+        // Record every transfer in Reports line-by-line
+        this.reportsService.recordEntry({
+          productId: product.productId || '',
+          productName: product.name,
+          eventType: 'STOCK_TRANSFERRED',
+          eventTitle: 'Stock Transferred to LCC',
+          quantityChange: -quantity,
+          previousStock: product.quantity,
+          newStock: product.quantity - quantity,
+          location: product.location || 'Not assigned',
+          updatedBy: switchedBy,
+          remarks: `Transferred to LCC inventory`,
+          date: this.transferForm.date
+        });
+
+        const remStock = product.quantity - quantity;
+        this.closeTransferForm();
+
+        this.showSuccess(
+          'Transferred to LCC Successfully!',
+          'Product stock has been transferred from warehouse to LCC inventory in database.',
+          [
+            { label: 'Product', value: `${product.productId ? product.productId + ' (' + product.name + ')' : product.name}` },
+            { label: 'Quantity Transferred', value: `${quantity} PCS` },
+            { label: 'Remaining Warehouse Stock', value: `${remStock >= 0 ? remStock : 0} PCS` },
+            { label: 'Switched By', value: switchedBy }
+          ]
+        );
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.showWarning('Transfer Failed', err.error?.message || 'Could not transfer product to LCC.');
+        this.cdr.detectChanges();
+      }
     });
-
-    // Record every transfer in Reports line-by-line
-    this.reportsService.recordEntry({
-      productId: product.productId || '',
-      productName: product.name,
-      eventType: 'STOCK_TRANSFERRED',
-      eventTitle: 'Stock Transferred to LCC',
-      quantityChange: -quantity,
-      previousStock: product.quantity,
-      newStock: product.quantity - quantity,
-      location: product.location || 'Not assigned',
-      updatedBy: switchedBy,
-      remarks: `Transferred to LCC inventory`,
-      date: this.transferForm.date
-    });
-
-    this.closeTransferForm();
-    
-
-    this.showSuccess(
-      'Transferred to LCC Successfully!',
-      'Product stock has been transferred from warehouse to LCC inventory.',
-      [
-        { label: 'Product', value: `${product.productId ? product.productId + ' (' + product.name + ')' : product.name}` },
-        { label: 'Quantity Transferred', value: `${quantity} PCS` },
-        { label: 'Remaining Warehouse Stock', value: `${product.quantity - quantity} PCS` },
-        { label: 'Switched By', value: switchedBy }
-      ]
-    );
   }
 
   // ==================== DATE ====================
@@ -602,7 +541,7 @@ export class Products {
   // ==================== EDIT PRODUCT ====================
 
   editProduct(product: Product): void {
-    this.editingId = product.id;
+    this.editingId = product.productId || product.id || product._id;
     this.isCustomProductId = true;
 
     this.productForm = {
@@ -699,10 +638,11 @@ export class Products {
 
     // ==================== EDITING EXISTING PRODUCT ====================
     if (this.editingId !== null) {
+      const editTarget = String(this.editingId).trim().toLowerCase();
       // Check if user changed productId to match ANOTHER product
       const conflictingProduct = this.products.find(
         existing =>
-          existing.id !== this.editingId &&
+          String(existing.productId || existing.id || existing._id).trim().toLowerCase() !== editTarget &&
           (existing.productId || '').trim().toLowerCase() === productId.toLowerCase()
       );
 
@@ -715,7 +655,9 @@ export class Products {
       }
 
       // Normal edit of existing product
-      const oldProduct = this.products.find(existing => existing.id === this.editingId);
+      const oldProduct = this.products.find(existing =>
+        String(existing.productId || existing.id || existing._id).trim().toLowerCase() === editTarget
+      );
       const prevStock = oldProduct ? oldProduct.quantity : 0;
       const addedBy = oldProduct?.addedBy || updatedBy;
 
@@ -732,51 +674,67 @@ export class Products {
         addedBy
       };
 
-      this.products = this.products.map(existing =>
-        existing.id === this.editingId ? product : existing
-      );
-      this.saveProducts();
+      const targetId = oldProduct?.productId || String(this.editingId);
+      const updateData = {
+        productId,
+        name,
+        quantity,
+        receivedDate: this.productForm.receivedDate,
+        sponsorName: this.productForm.sponsorName || '',
+        image: this.productForm.image || '',
+        location,
+        updatedBy
+      };
 
-      // Remember new product name in suggestion list
-      if (!this.productNames.some(item => item.toLowerCase() === name.toLowerCase())) {
-        this.productNames = [...this.productNames, name];
-      }
+      this.productService.editProduct(targetId, updateData).subscribe({
+        next: (res) => {
+          this.loadProducts();
 
-      this.reportsService.recordEntry({
-        productId: product.productId,
-        productName: product.name,
-        eventType: 'PRODUCT_UPDATED',
-        eventTitle: 'Product Updated',
-        quantityChange: product.quantity - prevStock,
-        previousStock: prevStock,
-        newStock: product.quantity,
-        location: product.location,
-        updatedBy: updatedBy,
-        remarks: `Updated by ${updatedBy}`,
-        date: product.receivedDate
+          if (!this.productNames.some(item => item.toLowerCase() === name.toLowerCase())) {
+            this.productNames = [...this.productNames, name];
+          }
+
+          this.reportsService.recordEntry({
+            productId,
+            productName: name,
+            eventType: 'PRODUCT_UPDATED',
+            eventTitle: 'Product Updated',
+            quantityChange: quantity - prevStock,
+            previousStock: prevStock,
+            newStock: quantity,
+            location,
+            updatedBy,
+            remarks: `Updated by ${updatedBy}`,
+            date: this.productForm.receivedDate
+          });
+
+          this.closeForm();
+
+          this.showSuccess(
+            'Product Updated Successfully!',
+            'Product details have been updated in database.',
+            [
+              { label: 'Product ID', value: productId },
+              { label: 'Product Name', value: name },
+              { label: 'Available Stock', value: `${quantity} PCS` },
+              { label: 'Location', value: location },
+              { label: 'Updated By', value: updatedBy }
+            ]
+          );
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.showWarning('Update Failed', err.error?.message || 'Could not update product.');
+          this.cdr.detectChanges();
+        }
       });
-
-      this.closeForm();
-
-      this.showSuccess(
-        'Product Updated Successfully!',
-        'Product details have been updated.',
-        [
-          { label: 'Product ID', value: product.productId },
-          { label: 'Product Name', value: product.name },
-          { label: 'Available Stock', value: `${product.quantity} PCS` },
-          { label: 'Location', value: product.location },
-          { label: 'Updated By', value: updatedBy }
-        ]
-      );
       return;
     }
 
 
 
     // ==================== BRAND NEW PRODUCT ====================
-    const product: Product = {
-      id: Date.now(),
+    const newProductData = {
       productId,
       name,
       quantity,
@@ -788,44 +746,44 @@ export class Products {
       addedBy: updatedBy
     };
 
-    this.products = [product, ...this.products];
-    const enteredNum = parseInt(productId.replace(/\D/g, ''), 10);
-    if (!isNaN(enteredNum) && enteredNum >= this.nextProductId) {
-      this.nextProductId = enteredNum + 1;
-    } else {
-      this.nextProductId++;
-    }
+    this.productService.addProduct(newProductData).subscribe({
+      next: (res) => {
+        this.loadProducts();
 
-    this.saveProducts();
+        this.reportsService.recordEntry({
+          productId,
+          productName: name,
+          eventType: 'PRODUCT_ADDED',
+          eventTitle: 'Product Added',
+          quantityChange: quantity,
+          previousStock: 0,
+          newStock: quantity,
+          location,
+          updatedBy,
+          remarks: this.productForm.sponsorName ? `Sponsor: ${this.productForm.sponsorName} • Added by ${updatedBy}` : `Added by ${updatedBy}`,
+          date: this.productForm.receivedDate
+        });
 
-    // Record brand new product entry in Reports line-by-line
-    this.reportsService.recordEntry({
-      productId: product.productId,
-      productName: product.name,
-      eventType: 'PRODUCT_ADDED',
-      eventTitle: 'Product Added',
-      quantityChange: product.quantity,
-      previousStock: 0,
-      newStock: product.quantity,
-      location: product.location,
-      updatedBy: updatedBy,
-      remarks: product.sponsorName ? `Sponsor: ${product.sponsorName} • Added by ${updatedBy}` : `Added by ${updatedBy}`,
-      date: product.receivedDate
+        this.closeForm();
+
+        this.showSuccess(
+          'Product Added Successfully!',
+          'New product has been added to warehouse inventory in database.',
+          [
+            { label: 'Product ID', value: productId },
+            { label: 'Product Name', value: name },
+            { label: 'Available Stock', value: `${quantity} PCS` },
+            { label: 'Location', value: location },
+            { label: 'Added By', value: updatedBy }
+          ]
+        );
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.showWarning('Add Product Failed', err.error?.message || 'Could not add product.');
+        this.cdr.detectChanges();
+      }
     });
-
-    this.closeForm();
-
-    this.showSuccess(
-      'Product Added Successfully!',
-      'New product has been added to warehouse inventory.',
-      [
-        { label: 'Product ID', value: product.productId },
-        { label: 'Product Name', value: product.name },
-        { label: 'Available Stock', value: `${product.quantity} PCS` },
-        { label: 'Location', value: product.location },
-        { label: 'Added By', value: updatedBy }
-      ]
-    );
   }
 
   // ==================== RECEIVE STOCK ====================
@@ -843,7 +801,7 @@ export class Products {
 
     if (product) {
       this.selectedReceiveProduct = product;
-      this.selectedReceiveProductId = product.id;
+      this.selectedReceiveProductId = product.productId || product.id;
     } else {
       this.selectedReceiveProduct = null;
       this.selectedReceiveProductId = null;
@@ -862,7 +820,12 @@ export class Products {
       this.selectedReceiveProduct = null;
       return;
     }
-    const found = this.products.find(p => p.id === Number(productId)) || null;
+    const target = String(productId).trim().toLowerCase();
+    const found = this.products.find(p =>
+      (p.productId && String(p.productId).trim().toLowerCase() === target) ||
+      (p.id && String(p.id).trim().toLowerCase() === target) ||
+      (p._id && String(p._id).trim().toLowerCase() === target)
+    ) || null;
     this.selectedReceiveProduct = found;
   }
 
@@ -895,50 +858,53 @@ export class Products {
       return;
     }
 
-    const targetId = this.selectedReceiveProduct.id;
-    const previousQty = this.selectedReceiveProduct.quantity;
+    const prod = this.selectedReceiveProduct;
+    const targetId = prod.productId || String(prod.id);
+    const previousQty = prod.quantity;
     const newQty = previousQty + qty;
 
-    this.products = this.products.map(p =>
-      p.id === targetId
-        ? {
-            ...p,
-            quantity: newQty,
-            updatedBy: updatedBy,
-            receivedDate: this.receiveStockForm.date || p.receivedDate
-          }
-        : p
-    );
-
-    this.saveProducts();
-    const prod = this.selectedReceiveProduct;
-    this.closeReceiveStock();
-
-    // Record every stock received in Reports line-by-line
-    this.reportsService.recordEntry({
+    this.productService.restockProduct({
       productId: prod.productId,
-      productName: prod.name,
-      eventType: 'STOCK_RECEIVED',
-      eventTitle: 'Stock Received',
-      quantityChange: qty,
-      previousStock: previousQty,
-      newStock: newQty,
-      location: prod.location,
-      updatedBy: updatedBy,
-      remarks: `Stock updated (+${qty} PCS)`,
+      quantity: qty,
+      updatedBy,
       date: this.receiveStockForm.date
-    });
+    }).subscribe({
+      next: (res) => {
+        this.loadProducts();
+        this.closeReceiveStock();
 
-    this.showSuccess(
-      'Stock Updated Successfully!',
-      'Warehouse stock has been received and updated.',
-      [
-        { label: 'Product', value: `${prod.productId} (${prod.name})` },
-        { label: 'Added', value: `+${qty} PCS` },
-        { label: 'New Available Stock', value: `${newQty} PCS` },
-        { label: 'Updated by', value: updatedBy }
-      ]
-    );
+        // Record every stock received in Reports line-by-line
+        this.reportsService.recordEntry({
+          productId: prod.productId,
+          productName: prod.name,
+          eventType: 'STOCK_RECEIVED',
+          eventTitle: 'Stock Received',
+          quantityChange: qty,
+          previousStock: previousQty,
+          newStock: newQty,
+          location: prod.location,
+          updatedBy: updatedBy,
+          remarks: `Stock updated (+${qty} PCS)`,
+          date: this.receiveStockForm.date
+        });
+
+        this.showSuccess(
+          'Stock Updated Successfully!',
+          'Warehouse stock has been received and updated in database.',
+          [
+            { label: 'Product', value: `${prod.productId} (${prod.name})` },
+            { label: 'Added', value: `+${qty} PCS` },
+            { label: 'New Available Stock', value: `${newQty} PCS` },
+            { label: 'Updated by', value: updatedBy }
+          ]
+        );
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.showWarning('Restock Failed', err.error?.message || 'Could not update stock.');
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   addReceivedStock(product: Product): void {
@@ -947,31 +913,45 @@ export class Products {
 
   // ==================== DELETE PRODUCT ====================
 
-  deleteProduct(id: number): void {
-    const product = this.products.find(p => p.id === id);
+  deleteProduct(id: any): void {
+    const target = String(id).trim().toLowerCase();
+    const product = this.products.find(p =>
+      (p.productId && String(p.productId).trim().toLowerCase() === target) ||
+      (p.id && String(p.id).trim().toLowerCase() === target) ||
+      (p._id && String(p._id).trim().toLowerCase() === target)
+    );
     const name = product ? `${product.productId} (${product.name})` : 'this product';
     this.showConfirm(
       'Delete Product?',
       `Are you sure you want to delete ${name}? This action cannot be undone.`,
       () => {
-        if (product) {
-          // Record product deletion in Reports line-by-line
-          this.reportsService.recordEntry({
-            productId: product.productId,
-            productName: product.name,
-            eventType: 'PRODUCT_DELETED',
-            eventTitle: 'Product Deleted',
-            quantityChange: -product.quantity,
-            previousStock: product.quantity,
-            newStock: 0,
-            location: product.location,
-            updatedBy: 'Admin',
-            remarks: 'Product removed from warehouse inventory'
-          });
-        }
-        this.products = this.products.filter(p => p.id !== id);
-        this.saveProducts();
-        this.showSuccess('Product Deleted', `${name} was removed from warehouse products.`);
+        const targetId = product?.productId || String(id);
+        this.productService.deleteProduct(targetId).subscribe({
+          next: () => {
+            this.loadProducts();
+            if (product) {
+              // Record product deletion in Reports line-by-line
+              this.reportsService.recordEntry({
+                productId: product.productId,
+                productName: product.name,
+                eventType: 'PRODUCT_DELETED',
+                eventTitle: 'Product Deleted',
+                quantityChange: -product.quantity,
+                previousStock: product.quantity,
+                newStock: 0,
+                location: product.location,
+                updatedBy: 'Admin',
+                remarks: 'Product removed from warehouse inventory'
+              });
+            }
+            this.showSuccess('Product Deleted', `${name} was removed from warehouse products.`);
+            this.cdr.detectChanges();
+          },
+          error: (err) => {
+            this.showWarning('Delete Failed', err.error?.message || 'Could not delete product.');
+            this.cdr.detectChanges();
+          }
+        });
       },
       'Delete Product',
       'error'
@@ -991,7 +971,7 @@ export class Products {
   trackByProductId(
     index: number,
     product: Product
-  ): number {
-    return product.id;
+  ): any {
+    return product.productId || product.id || index;
   }
 }

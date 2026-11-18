@@ -684,6 +684,26 @@
   stroke: #dc2626;
 }
 
+.login-success-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  color: #15803d;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 13.5px;
+  font-weight: 500;
+  animation: bannerFadeIn 0.25s ease-out;
+}
+
+.login-success-banner svg {
+  flex-shrink: 0;
+  stroke: #16a34a;
+}
+
 @keyframes bannerFadeIn {
   from {
     opacity: 0;

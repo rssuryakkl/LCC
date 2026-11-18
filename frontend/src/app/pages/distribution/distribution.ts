@@ -19,7 +19,7 @@ import { ReportsService } from '../../services/reports.service';
 // =====================================================
 
 interface DistributionProduct {
-  id: number;
+  id: any;
   productId: string;
   name: string;
   availableQty: number;

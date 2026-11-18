@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 export interface LccTransferItem {
-  id: number;
+  id: number | string;
   productId: string;
   name: string;
   quantity: number;
@@ -20,6 +21,35 @@ const STORAGE_KEY = 'lcc_transferred_items';
 export class LccService {
   private itemsSubject = new BehaviorSubject<LccTransferItem[]>(this.loadInitialItems());
   items$: Observable<LccTransferItem[]> = this.itemsSubject.asObservable();
+
+  constructor(private http: HttpClient) {
+    this.fetchTransfers();
+  }
+
+  fetchTransfers(): void {
+    const host = typeof window !== 'undefined' && window.location.hostname ? window.location.hostname : 'localhost';
+    this.http.get<{ success: boolean; transfers: any[] }>(`http://${host}:5000/api/products/transfers`).subscribe({
+      next: (res) => {
+        if (res && res.success && Array.isArray(res.transfers)) {
+          const loaded: LccTransferItem[] = res.transfers.map((t: any, idx: number) => ({
+            id: t._id || idx + 1,
+            productId: t.productId,
+            name: t.name,
+            quantity: Number(t.quantity) || 0,
+            date: t.date || new Date().toISOString().split('T')[0],
+            switchedBy: t.switchedBy || 'Admin',
+            location: t.location || 'LCC',
+            createdAt: t.createdAt || new Date().toISOString()
+          }));
+          const merged = this.deduplicateItems([...loaded, ...this.itemsSubject.value]);
+          this.itemsSubject.next(merged);
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load transfers from backend:', err);
+      }
+    });
+  }
 
   private deduplicateItems(items: LccTransferItem[]): LccTransferItem[] {
     const active = items.filter(it => (Number(it.quantity) || 0) > 0);
@@ -40,18 +70,13 @@ export class LccService {
     for (const [key, list] of grouped.entries()) {
       if (list.length === 1) {
         const single = list[0];
-        // Correction: if TS_103 was overwritten to 9 instead of adding to the 1 existing tshirt (1 + 9 = 10)
-        if (key.includes('ts_103') && single.quantity === 9) {
-          result.push({ ...single, quantity: 10 });
-        } else {
-          result.push(single);
-        }
+        result.push(single);
       } else {
         // Multiple entries for the same product exist:
         // Sort newest first to get the latest transfer date and switchedBy
         list.sort((a, b) => {
-          const timeA = a.createdAt ? new Date(a.createdAt).getTime() : (a.id || 0);
-          const timeB = b.createdAt ? new Date(b.createdAt).getTime() : (b.id || 0);
+          const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
           return timeB - timeA;
         });
 
@@ -70,8 +95,8 @@ export class LccService {
 
     // Sort by latest createdAt/id
     return result.sort((a, b) => {
-      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : (a.id || 0);
-      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : (b.id || 0);
+      const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
       return timeB - timeA;
     });
   }
@@ -79,20 +104,11 @@ export class LccService {
   private loadInitialItems(): LccTransferItem[] {
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
-        const data = localStorage.getItem(STORAGE_KEY);
-        if (data) {
-          const parsed = JSON.parse(data);
-          if (Array.isArray(parsed)) {
-            const deduplicated = this.deduplicateItems(parsed);
-            if (deduplicated.length !== parsed.length || JSON.stringify(deduplicated) !== data) {
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(deduplicated));
-            }
-            return deduplicated;
-          }
-        }
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem('warehouse_products');
       }
     } catch (e) {
-      console.error('Failed to load LCC items from localStorage', e);
+      console.error('Failed to clear temporary LCC items from localStorage', e);
     }
     return [];
   }
@@ -102,19 +118,6 @@ export class LccService {
   }
 
   getWarehouseProducts(): any[] {
-    try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        const data = localStorage.getItem('warehouse_products');
-        if (data) {
-          const parsed = JSON.parse(data);
-          if (Array.isArray(parsed)) {
-            return parsed.filter((p: any) => (Number(p.quantity) || 0) > 0);
-          }
-        }
-      }
-    } catch (e) {
-      console.error('Failed to load warehouse products from localStorage', e);
-    }
     return [];
   }
 
@@ -132,7 +135,7 @@ export class LccService {
     let updatedList: LccTransferItem[];
 
     if (existingIndex !== -1) {
-      // Product already exists in LCC -> Add the transferred quantity to existing LCC stock (e.g. 1 existing + 9 transferred = 10 PCS)
+      // Product already exists in LCC -> Add the transferred quantity to existing LCC stock
       const existing = current[existingIndex];
       const accumulatedQuantity = (Number(existing.quantity) || 0) + (Number(item.quantity) || 0);
 
@@ -162,12 +165,12 @@ export class LccService {
 
   updateItem(updatedItem: LccTransferItem): void {
     const current = this.itemsSubject.value;
-    const updated = current.map(item => (item.id === updatedItem.id ? updatedItem : item));
+    const updated = current.map(item => (String(item.id) === String(updatedItem.id) ? updatedItem : item));
     this.saveItems(updated);
   }
 
-  deleteTransfer(id: number): void {
-    const updated = this.itemsSubject.value.filter(item => item.id !== id);
+  deleteTransfer(id: number | string): void {
+    const updated = this.itemsSubject.value.filter(item => String(item.id) !== String(id));
     this.saveItems(updated);
   }
 

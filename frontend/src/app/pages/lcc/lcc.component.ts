@@ -216,8 +216,9 @@ export class LccComponent implements OnInit, OnDestroy {
     };
   }
 
-  deleteTransfer(id: number): void {
-    const item = this.items.find(i => i.id === id);
+  deleteTransfer(id: any): void {
+    const target = String(id).trim().toLowerCase();
+    const item = this.items.find(i => String(i.id).trim().toLowerCase() === target || (i.productId && String(i.productId).trim().toLowerCase() === target));
     const label = item ? `${item.productId ? item.productId + ' (' + item.name + ')' : item.name}` : 'this transfer record';
 
     this.showConfirm(
@@ -410,7 +411,7 @@ export class LccComponent implements OnInit, OnDestroy {
     this.router.navigate(['/products']);
   }
 
-  trackByTransferId(index: number, item: LccTransferItem): number {
-    return item.id;
+  trackByTransferId(index: number, item: LccTransferItem): any {
+    return item.id || item.productId || index;
   }
 }

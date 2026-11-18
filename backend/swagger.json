@@ -1,0 +1,484 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Warehouse & LCC Management API",
+    "version": "1.0.0",
+    "description": "API endpoints for Authentication, Product Inventory, Restock, and LCC Transfers"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000"
+    }
+  ],
+  "paths": {
+    "/api/auth/signup": {
+      "post": {
+        "summary": "User Sign Up",
+        "description": "Register a new user account with validation and encrypted password",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "fullName",
+                  "username",
+                  "email",
+                  "mobileNumber",
+                  "password",
+                  "confirmPassword"
+                ],
+                "properties": {
+                  "fullName": {
+                    "type": "string",
+                    "example": "Surya Kumar"
+                  },
+                  "username": {
+                    "type": "string",
+                    "example": "surya_user"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "surya@example.com"
+                  },
+                  "mobileNumber": {
+                    "type": "string",
+                    "example": "9876543210"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "Password@123"
+                  },
+                  "confirmPassword": {
+                    "type": "string",
+                    "example": "Password@123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Account created successfully"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "409": {
+            "description": "Username or email already exists"
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "User Login",
+        "description": "Authenticate user with username/email and password",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "username",
+                  "password"
+                ],
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "example": "surya_user"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "Password@123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful"
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        }
+      }
+    },
+    "/api/products": {
+      "get": {
+        "summary": "Get All Products",
+        "description": "Retrieve list of all products in warehouse inventory",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search term for product name, ID, or location",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of products"
+          }
+        }
+      },
+      "post": {
+        "summary": "Add New Product",
+        "description": "Add a new unique product to the warehouse",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "productId",
+                  "name",
+                  "quantity",
+                  "location"
+                ],
+                "properties": {
+                  "productId": {
+                    "type": "string",
+                    "example": "SA_102"
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "Saree"
+                  },
+                  "quantity": {
+                    "type": "number",
+                    "example": 50
+                  },
+                  "receivedDate": {
+                    "type": "string",
+                    "example": "2026-11-18"
+                  },
+                  "location": {
+                    "type": "string",
+                    "example": "Vadalur"
+                  },
+                  "sponsorName": {
+                    "type": "string",
+                    "example": "ABC Trust"
+                  },
+                  "updatedBy": {
+                    "type": "string",
+                    "example": "Surya"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product added successfully"
+          },
+          "409": {
+            "description": "Product ID or Name already exists"
+          }
+        }
+      }
+    },
+    "/api/products/{id}": {
+      "get": {
+        "summary": "Get Product By ID",
+        "description": "Retrieve single product details by MongoDB ID or custom Product ID (e.g. SA_102)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product details"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        }
+      },
+      "put": {
+        "summary": "Edit Product",
+        "description": "Update product details (name, quantity, location, sponsor, etc.)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "productId": {
+                    "type": "string",
+                    "example": "SA_102"
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "Silk Saree"
+                  },
+                  "quantity": {
+                    "type": "number",
+                    "example": 60
+                  },
+                  "location": {
+                    "type": "string",
+                    "example": "Tiruppur"
+                  },
+                  "sponsorName": {
+                    "type": "string",
+                    "example": "XYZ Foundation"
+                  },
+                  "updatedBy": {
+                    "type": "string",
+                    "example": "Surya"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product updated successfully"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete Product",
+        "description": "Delete a product from the warehouse",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product deleted successfully"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        }
+      }
+    },
+    "/api/products/restock": {
+      "post": {
+        "summary": "Restock Product Stock",
+        "description": "Add new received stock to an existing warehouse product",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "productId",
+                  "quantity"
+                ],
+                "properties": {
+                  "productId": {
+                    "type": "string",
+                    "example": "SA_102"
+                  },
+                  "quantity": {
+                    "type": "number",
+                    "example": 25
+                  },
+                  "updatedBy": {
+                    "type": "string",
+                    "example": "Surya"
+                  },
+                  "date": {
+                    "type": "string",
+                    "example": "2026-11-18"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Stock updated successfully"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        }
+      }
+    },
+    "/api/products/transfer": {
+      "post": {
+        "summary": "Move to LCC (Transfer Stock)",
+        "description": "Transfer stock from Warehouse to LCC inventory and log transfer history",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "productId",
+                  "quantity",
+                  "switchedBy"
+                ],
+                "properties": {
+                  "productId": {
+                    "type": "string",
+                    "example": "SA_102"
+                  },
+                  "quantity": {
+                    "type": "number",
+                    "example": 10
+                  },
+                  "switchedBy": {
+                    "type": "string",
+                    "example": "Karthik"
+                  },
+                  "date": {
+                    "type": "string",
+                    "example": "2026-11-18"
+                  },
+                  "location": {
+                    "type": "string",
+                    "example": "Vadalur"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Stock transferred to LCC successfully"
+          },
+          "400": {
+            "description": "Insufficient warehouse stock or validation error"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        }
+      }
+    },
+    "/api/products/transfers": {
+      "get": {
+        "summary": "Get LCC Transfer History",
+        "description": "Retrieve list of all stock transferred to LCC",
+        "responses": {
+          "200": {
+            "description": "List of LCC transfer records"
+          }
+        }
+      }
+    },
+    "/api/reports": {
+      "get": {
+        "summary": "Get Reports History",
+        "description": "Retrieve all recorded line-by-line inventory activity logs and changes",
+        "parameters": [
+          { "name": "search", "in": "query", "schema": { "type": "string" }, "description": "Search product, user, or action" },
+          { "name": "eventType", "in": "query", "schema": { "type": "string" }, "description": "Filter by event type" },
+          { "name": "date", "in": "query", "schema": { "type": "string" }, "description": "Filter by date (YYYY-MM-DD)" },
+          { "name": "sort", "in": "query", "schema": { "type": "string", "enum": ["newest", "oldest"] }, "description": "Sort order" }
+        ],
+        "responses": {
+          "200": { "description": "List of report records" }
+        }
+      },
+      "post": {
+        "summary": "Record Report Entry",
+        "description": "Record a new line-by-line inventory transaction or change in reports history",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["productId", "productName", "eventType", "quantityChange", "updatedBy"],
+                "properties": {
+                  "productId": { "type": "string", "example": "SA_102" },
+                  "productName": { "type": "string", "example": "Saree" },
+                  "eventType": { "type": "string", "example": "STOCK_RECEIVED" },
+                  "eventTitle": { "type": "string", "example": "Stock Received" },
+                  "quantityChange": { "type": "number", "example": 20 },
+                  "previousStock": { "type": "number", "example": 70 },
+                  "newStock": { "type": "number", "example": 90 },
+                  "location": { "type": "string", "example": "Vadalur" },
+                  "updatedBy": { "type": "string", "example": "Surya" },
+                  "remarks": { "type": "string", "example": "Stock replenished" },
+                  "date": { "type": "string", "example": "2026-11-18" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Report entry recorded successfully" }
+        }
+      },
+      "delete": {
+        "summary": "Clear All Reports",
+        "description": "Delete all report records from the database",
+        "responses": {
+          "200": { "description": "All reports cleared" }
+        }
+      }
+    },
+    "/api/reports/{id}": {
+      "delete": {
+        "summary": "Delete Report Record",
+        "description": "Delete a single report record by ID",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Record ID or MongoDB ID" }
+        ],
+        "responses": {
+          "200": { "description": "Report record deleted successfully" },
+          "404": { "description": "Report record not found" }
+        }
+      }
+    },
+    "/api/dashboard/stats": {
+      "get": {
+        "summary": "Get Dashboard Metrics & Stats",
+        "description": "Retrieve summary cards, low stock alerts (< 20 PCS), weekly movement chart data, and recent operations",
+        "responses": {
+          "200": { "description": "Aggregated dashboard statistics" }
+        }
+      }
+    }
+  }
+}

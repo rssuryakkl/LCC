@@ -26,16 +26,10 @@ export class DistributionService {
   private loadInitialRecords(): DistributionRecord[] {
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
-        const data = localStorage.getItem(STORAGE_KEY);
-        if (data) {
-          const parsed = JSON.parse(data);
-          if (Array.isArray(parsed)) {
-            return parsed;
-          }
-        }
+        localStorage.removeItem(STORAGE_KEY);
       }
     } catch (e) {
-      console.error('Failed to load distribution records from localStorage', e);
+      console.error('Failed to clear distribution records from localStorage', e);
     }
     return [];
   }

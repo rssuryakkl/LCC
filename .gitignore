@@ -5,11 +5,17 @@
 /tmp
 /out-tsc
 /bazel-out
+frontend/dist/
 
 # Node
 /node_modules
+**/node_modules/
 npm-debug.log
 yarn-error.log
+
+# Environment variables
+.env
+*.env
 
 # IDEs and editors
 .idea/
@@ -31,6 +37,7 @@ yarn-error.log
 
 # Miscellaneous
 /.angular/cache
+**/.angular/
 .sass-cache/
 /connect.lock
 /coverage
@@ -42,3 +49,7 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Local MongoDB
+mongod.exe
+data/

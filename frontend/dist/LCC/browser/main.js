@@ -4,9 +4,12 @@ import {
   RouterLinkActive,
   RouterOutlet,
   bootstrapApplication,
-  provideHttpClient,
   provideRouter
-} from "./chunk-QEGN6UXF.js";
+} from "./chunk-COJXPTP5.js";
+import {
+  HttpClient,
+  provideHttpClient
+} from "./chunk-6RRYQ5VV.js";
 import {
   CheckboxControlValueAccessor,
   DefaultValueAccessor,
@@ -18,13 +21,16 @@ import {
   NgModel,
   RequiredValidator,
   ɵNgNoValidate
-} from "./chunk-STUIIXEF.js";
+} from "./chunk-PXEA3Q4X.js";
 import {
+  ChangeDetectorRef,
   CommonModule,
   Component,
+  Injectable,
   NgForOf,
   NgIf,
   setClassMetadata,
+  tap,
   ɵsetClassDebugInfo,
   ɵɵadvance,
   ɵɵattribute,
@@ -32,11 +38,13 @@ import {
   ɵɵcontrol,
   ɵɵcontrolCreate,
   ɵɵdefineComponent,
+  ɵɵdefineInjectable,
   ɵɵdirectiveInject,
   ɵɵelement,
   ɵɵelementEnd,
   ɵɵelementStart,
   ɵɵgetCurrentView,
+  ɵɵinject,
   ɵɵlistener,
   ɵɵnamespaceHTML,
   ɵɵnamespaceSVG,
@@ -53,13 +61,74 @@ import {
   ɵɵtwoWayBindingSet,
   ɵɵtwoWayListener,
   ɵɵtwoWayProperty
-} from "./chunk-QKVBSWNP.js";
+} from "./chunk-ZK3G55GN.js";
+
+// src/app/services/auth.service.ts
+var AuthService = class _AuthService {
+  constructor(http) {
+    this.http = http;
+  }
+  http;
+  get baseUrl() {
+    const host = typeof window !== "undefined" && window.location.hostname ? window.location.hostname : "localhost";
+    return `http://${host}:5000/api/auth`;
+  }
+  signup(data) {
+    console.log("Signup Request Payload:", data);
+    return this.http.post(`${this.baseUrl}/signup`, data).pipe(tap({
+      next: (response) => {
+        console.log("Signup API Response:", response);
+        if (typeof window !== "undefined" && window.localStorage) {
+          localStorage.setItem("currentUser", JSON.stringify({
+            fullName: data.fullName,
+            username: data.username,
+            email: data.email
+          }));
+        }
+      },
+      error: (error) => {
+        console.error("Signup API Error:", error);
+        console.error("Backend Error Response:", error.error);
+      }
+    }));
+  }
+  login(credentials) {
+    return this.http.post(`${this.baseUrl}/login`, credentials).pipe(tap({
+      next: (response) => {
+        console.log("Login Response:", response);
+        if (typeof window !== "undefined" && window.localStorage) {
+          if (response.token) {
+            localStorage.setItem("authToken", response.token);
+          }
+          if (response.user) {
+            localStorage.setItem("currentUser", JSON.stringify(response.user));
+          }
+        }
+      },
+      error: (error) => {
+        console.error("Login Error:", error);
+      }
+    }));
+  }
+  static \u0275fac = function AuthService_Factory(__ngFactoryType__) {
+    return new (__ngFactoryType__ || _AuthService)(\u0275\u0275inject(HttpClient));
+  };
+  static \u0275prov = /* @__PURE__ */ \u0275\u0275defineInjectable({ token: _AuthService, factory: _AuthService.\u0275fac, providedIn: "root" });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(AuthService, [{
+    type: Injectable,
+    args: [{
+      providedIn: "root"
+    }]
+  }], () => [{ type: HttpClient }], null);
+})();
 
 // src/app/pages/login/login.component.ts
 function LoginComponent_div_57_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 44);
-    \u0275\u0275element(1, "img", 45);
+    \u0275\u0275elementStart(0, "div", 45);
+    \u0275\u0275element(1, "img", 46);
     \u0275\u0275elementEnd();
   }
   if (rf & 2) {
@@ -71,7 +140,7 @@ function LoginComponent_div_57_Template(rf, ctx) {
 function LoginComponent_button_60_Template(rf, ctx) {
   if (rf & 1) {
     const _r2 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 46);
+    \u0275\u0275elementStart(0, "button", 47);
     \u0275\u0275listener("click", function LoginComponent_button_60_Template_button_click_0_listener() {
       const i_r3 = \u0275\u0275restoreView(_r2).index;
       const ctx_r3 = \u0275\u0275nextContext();
@@ -88,10 +157,28 @@ function LoginComponent_button_60_Template(rf, ctx) {
 }
 function LoginComponent_div_71_Template(rf, ctx) {
   if (rf & 1) {
-    \u0275\u0275elementStart(0, "div", 47);
+    \u0275\u0275elementStart(0, "div", 48);
     \u0275\u0275namespaceSVG();
-    \u0275\u0275elementStart(1, "svg", 48);
-    \u0275\u0275element(2, "circle", 49)(3, "line", 50)(4, "line", 51);
+    \u0275\u0275elementStart(1, "svg", 49);
+    \u0275\u0275element(2, "path", 50)(3, "polyline", 51);
+    \u0275\u0275elementEnd();
+    \u0275\u0275namespaceHTML();
+    \u0275\u0275elementStart(4, "span");
+    \u0275\u0275text(5);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const ctx_r3 = \u0275\u0275nextContext();
+    \u0275\u0275advance(5);
+    \u0275\u0275textInterpolate(ctx_r3.successMessage);
+  }
+}
+function LoginComponent_div_72_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 52);
+    \u0275\u0275namespaceSVG();
+    \u0275\u0275elementStart(1, "svg", 49);
+    \u0275\u0275element(2, "circle", 53)(3, "line", 54)(4, "line", 55);
     \u0275\u0275elementEnd();
     \u0275\u0275namespaceHTML();
     \u0275\u0275elementStart(5, "span");
@@ -104,69 +191,87 @@ function LoginComponent_div_71_Template(rf, ctx) {
     \u0275\u0275textInterpolate(ctx_r3.errorMessage);
   }
 }
-function LoginComponent__svg_svg_82_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275namespaceSVG();
-    \u0275\u0275elementStart(0, "svg", 52);
-    \u0275\u0275element(1, "path", 53)(2, "circle", 54);
-    \u0275\u0275elementEnd();
-  }
-}
 function LoginComponent__svg_svg_83_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275namespaceSVG();
-    \u0275\u0275elementStart(0, "svg", 52);
-    \u0275\u0275element(1, "path", 55)(2, "path", 56)(3, "path", 57);
+    \u0275\u0275elementStart(0, "svg", 56);
+    \u0275\u0275element(1, "path", 57)(2, "circle", 58);
     \u0275\u0275elementEnd();
   }
 }
-function LoginComponent_div_112__svg_svg_23_Template(rf, ctx) {
+function LoginComponent__svg_svg_84_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275namespaceSVG();
-    \u0275\u0275elementStart(0, "svg", 71);
-    \u0275\u0275element(1, "path", 72)(2, "circle", 54);
+    \u0275\u0275elementStart(0, "svg", 56);
+    \u0275\u0275element(1, "path", 59)(2, "path", 60)(3, "path", 61);
     \u0275\u0275elementEnd();
   }
 }
-function LoginComponent_div_112__svg_svg_24_Template(rf, ctx) {
+function LoginComponent_div_113_div_6_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275elementStart(0, "div", 52);
+    \u0275\u0275namespaceSVG();
+    \u0275\u0275elementStart(1, "svg", 49);
+    \u0275\u0275element(2, "circle", 53)(3, "line", 54)(4, "line", 55);
+    \u0275\u0275elementEnd();
+    \u0275\u0275namespaceHTML();
+    \u0275\u0275elementStart(5, "span");
+    \u0275\u0275text(6);
+    \u0275\u0275elementEnd()();
+  }
+  if (rf & 2) {
+    const ctx_r3 = \u0275\u0275nextContext(2);
+    \u0275\u0275advance(6);
+    \u0275\u0275textInterpolate(ctx_r3.signupError);
+  }
+}
+function LoginComponent_div_113__svg_svg_24_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275namespaceSVG();
-    \u0275\u0275elementStart(0, "svg", 71);
-    \u0275\u0275element(1, "path", 55)(2, "path", 56)(3, "path", 57);
+    \u0275\u0275elementStart(0, "svg", 75);
+    \u0275\u0275element(1, "path", 76)(2, "circle", 58);
     \u0275\u0275elementEnd();
   }
 }
-function LoginComponent_div_112__svg_svg_30_Template(rf, ctx) {
+function LoginComponent_div_113__svg_svg_25_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275namespaceSVG();
-    \u0275\u0275elementStart(0, "svg", 71);
-    \u0275\u0275element(1, "path", 72)(2, "circle", 54);
+    \u0275\u0275elementStart(0, "svg", 75);
+    \u0275\u0275element(1, "path", 59)(2, "path", 60)(3, "path", 61);
     \u0275\u0275elementEnd();
   }
 }
-function LoginComponent_div_112__svg_svg_31_Template(rf, ctx) {
+function LoginComponent_div_113__svg_svg_31_Template(rf, ctx) {
   if (rf & 1) {
     \u0275\u0275namespaceSVG();
-    \u0275\u0275elementStart(0, "svg", 71);
-    \u0275\u0275element(1, "path", 55)(2, "path", 56)(3, "path", 57);
+    \u0275\u0275elementStart(0, "svg", 75);
+    \u0275\u0275element(1, "path", 76)(2, "circle", 58);
     \u0275\u0275elementEnd();
   }
 }
-function LoginComponent_div_112_Template(rf, ctx) {
+function LoginComponent_div_113__svg_svg_32_Template(rf, ctx) {
+  if (rf & 1) {
+    \u0275\u0275namespaceSVG();
+    \u0275\u0275elementStart(0, "svg", 75);
+    \u0275\u0275element(1, "path", 59)(2, "path", 60)(3, "path", 61);
+    \u0275\u0275elementEnd();
+  }
+}
+function LoginComponent_div_113_Template(rf, ctx) {
   if (rf & 1) {
     const _r5 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 58);
-    \u0275\u0275listener("click", function LoginComponent_div_112_Template_div_click_0_listener() {
+    \u0275\u0275elementStart(0, "div", 62);
+    \u0275\u0275listener("click", function LoginComponent_div_113_Template_div_click_0_listener() {
       \u0275\u0275restoreView(_r5);
       const ctx_r3 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r3.closeSignup());
     });
-    \u0275\u0275elementStart(1, "div", 59);
-    \u0275\u0275listener("click", function LoginComponent_div_112_Template_div_click_1_listener($event) {
+    \u0275\u0275elementStart(1, "div", 63);
+    \u0275\u0275listener("click", function LoginComponent_div_113_Template_div_click_1_listener($event) {
       return $event.stopPropagation();
     });
-    \u0275\u0275elementStart(2, "button", 60);
-    \u0275\u0275listener("click", function LoginComponent_div_112_Template_button_click_2_listener() {
+    \u0275\u0275elementStart(2, "button", 64);
+    \u0275\u0275listener("click", function LoginComponent_div_113_Template_button_click_2_listener() {
       \u0275\u0275restoreView(_r5);
       const ctx_r3 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r3.closeSignup());
@@ -176,106 +281,109 @@ function LoginComponent_div_112_Template(rf, ctx) {
     \u0275\u0275elementStart(4, "h2");
     \u0275\u0275text(5, "Create Account");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(6, "label");
-    \u0275\u0275text(7, "Full Name");
+    \u0275\u0275template(6, LoginComponent_div_113_div_6_Template, 7, 1, "div", 25);
+    \u0275\u0275elementStart(7, "label");
+    \u0275\u0275text(8, "Full Name");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(8, "input", 61);
+    \u0275\u0275elementStart(9, "input", 65);
     \u0275\u0275controlCreate();
-    \u0275\u0275twoWayListener("ngModelChange", function LoginComponent_div_112_Template_input_ngModelChange_8_listener($event) {
+    \u0275\u0275twoWayListener("ngModelChange", function LoginComponent_div_113_Template_input_ngModelChange_9_listener($event) {
       \u0275\u0275restoreView(_r5);
       const ctx_r3 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r3.signupData.fullName, $event) || (ctx_r3.signupData.fullName = $event);
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(9, "label");
-    \u0275\u0275text(10, "Username");
+    \u0275\u0275elementStart(10, "label");
+    \u0275\u0275text(11, "Username");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(11, "input", 62);
+    \u0275\u0275elementStart(12, "input", 66);
     \u0275\u0275controlCreate();
-    \u0275\u0275twoWayListener("ngModelChange", function LoginComponent_div_112_Template_input_ngModelChange_11_listener($event) {
+    \u0275\u0275twoWayListener("ngModelChange", function LoginComponent_div_113_Template_input_ngModelChange_12_listener($event) {
       \u0275\u0275restoreView(_r5);
       const ctx_r3 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r3.signupData.username, $event) || (ctx_r3.signupData.username = $event);
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(12, "label");
-    \u0275\u0275text(13, "Email");
+    \u0275\u0275elementStart(13, "label");
+    \u0275\u0275text(14, "Email");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(14, "input", 63);
+    \u0275\u0275elementStart(15, "input", 67);
     \u0275\u0275controlCreate();
-    \u0275\u0275twoWayListener("ngModelChange", function LoginComponent_div_112_Template_input_ngModelChange_14_listener($event) {
+    \u0275\u0275twoWayListener("ngModelChange", function LoginComponent_div_113_Template_input_ngModelChange_15_listener($event) {
       \u0275\u0275restoreView(_r5);
       const ctx_r3 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r3.signupData.email, $event) || (ctx_r3.signupData.email = $event);
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(15, "label");
-    \u0275\u0275text(16, "Mobile Number");
+    \u0275\u0275elementStart(16, "label");
+    \u0275\u0275text(17, "Mobile Number");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(17, "input", 64);
+    \u0275\u0275elementStart(18, "input", 68);
     \u0275\u0275controlCreate();
-    \u0275\u0275twoWayListener("ngModelChange", function LoginComponent_div_112_Template_input_ngModelChange_17_listener($event) {
+    \u0275\u0275twoWayListener("ngModelChange", function LoginComponent_div_113_Template_input_ngModelChange_18_listener($event) {
       \u0275\u0275restoreView(_r5);
       const ctx_r3 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r3.signupData.mobile, $event) || (ctx_r3.signupData.mobile = $event);
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(18, "label");
-    \u0275\u0275text(19, "Create Password");
+    \u0275\u0275elementStart(19, "label");
+    \u0275\u0275text(20, "Create Password");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(20, "div", 65)(21, "input", 66);
+    \u0275\u0275elementStart(21, "div", 69)(22, "input", 70);
     \u0275\u0275controlCreate();
-    \u0275\u0275twoWayListener("ngModelChange", function LoginComponent_div_112_Template_input_ngModelChange_21_listener($event) {
+    \u0275\u0275twoWayListener("ngModelChange", function LoginComponent_div_113_Template_input_ngModelChange_22_listener($event) {
       \u0275\u0275restoreView(_r5);
       const ctx_r3 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r3.signupData.createPassword, $event) || (ctx_r3.signupData.createPassword = $event);
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(22, "button", 67);
-    \u0275\u0275listener("click", function LoginComponent_div_112_Template_button_click_22_listener() {
+    \u0275\u0275elementStart(23, "button", 71);
+    \u0275\u0275listener("click", function LoginComponent_div_113_Template_button_click_23_listener() {
       \u0275\u0275restoreView(_r5);
       const ctx_r3 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r3.showCreatePassword = !ctx_r3.showCreatePassword);
     });
-    \u0275\u0275template(23, LoginComponent_div_112__svg_svg_23_Template, 3, 0, "svg", 68)(24, LoginComponent_div_112__svg_svg_24_Template, 4, 0, "svg", 68);
+    \u0275\u0275template(24, LoginComponent_div_113__svg_svg_24_Template, 3, 0, "svg", 72)(25, LoginComponent_div_113__svg_svg_25_Template, 4, 0, "svg", 72);
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(25, "label");
-    \u0275\u0275text(26, "Confirm Password");
+    \u0275\u0275elementStart(26, "label");
+    \u0275\u0275text(27, "Confirm Password");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(27, "div", 65)(28, "input", 69);
+    \u0275\u0275elementStart(28, "div", 69)(29, "input", 73);
     \u0275\u0275controlCreate();
-    \u0275\u0275twoWayListener("ngModelChange", function LoginComponent_div_112_Template_input_ngModelChange_28_listener($event) {
+    \u0275\u0275twoWayListener("ngModelChange", function LoginComponent_div_113_Template_input_ngModelChange_29_listener($event) {
       \u0275\u0275restoreView(_r5);
       const ctx_r3 = \u0275\u0275nextContext();
       \u0275\u0275twoWayBindingSet(ctx_r3.signupData.confirmPassword, $event) || (ctx_r3.signupData.confirmPassword = $event);
       return \u0275\u0275resetView($event);
     });
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(29, "button", 67);
-    \u0275\u0275listener("click", function LoginComponent_div_112_Template_button_click_29_listener() {
+    \u0275\u0275elementStart(30, "button", 71);
+    \u0275\u0275listener("click", function LoginComponent_div_113_Template_button_click_30_listener() {
       \u0275\u0275restoreView(_r5);
       const ctx_r3 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r3.showConfirmPassword = !ctx_r3.showConfirmPassword);
     });
-    \u0275\u0275template(30, LoginComponent_div_112__svg_svg_30_Template, 3, 0, "svg", 68)(31, LoginComponent_div_112__svg_svg_31_Template, 4, 0, "svg", 68);
+    \u0275\u0275template(31, LoginComponent_div_113__svg_svg_31_Template, 3, 0, "svg", 72)(32, LoginComponent_div_113__svg_svg_32_Template, 4, 0, "svg", 72);
     \u0275\u0275elementEnd()();
-    \u0275\u0275elementStart(32, "button", 70);
-    \u0275\u0275listener("click", function LoginComponent_div_112_Template_button_click_32_listener() {
+    \u0275\u0275elementStart(33, "button", 74);
+    \u0275\u0275listener("click", function LoginComponent_div_113_Template_button_click_33_listener() {
       \u0275\u0275restoreView(_r5);
       const ctx_r3 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r3.submitSignup());
     });
-    \u0275\u0275text(33, " Create Account ");
+    \u0275\u0275text(34);
     \u0275\u0275elementEnd()()();
   }
   if (rf & 2) {
     const ctx_r3 = \u0275\u0275nextContext();
-    \u0275\u0275advance(8);
+    \u0275\u0275advance(6);
+    \u0275\u0275property("ngIf", ctx_r3.signupError);
+    \u0275\u0275advance(3);
     \u0275\u0275twoWayProperty("ngModel", ctx_r3.signupData.fullName);
     \u0275\u0275control();
     \u0275\u0275advance(3);
@@ -303,14 +411,18 @@ function LoginComponent_div_112_Template(rf, ctx) {
     \u0275\u0275property("ngIf", !ctx_r3.showConfirmPassword);
     \u0275\u0275advance();
     \u0275\u0275property("ngIf", ctx_r3.showConfirmPassword);
+    \u0275\u0275advance();
+    \u0275\u0275property("disabled", ctx_r3.isSigningUp);
+    \u0275\u0275advance();
+    \u0275\u0275textInterpolate1(" ", ctx_r3.isSigningUp ? "Creating Account..." : "Create Account", " ");
   }
 }
-function LoginComponent_div_113_input_8_Template(rf, ctx) {
+function LoginComponent_div_114_input_8_Template(rf, ctx) {
   if (rf & 1) {
     const _r7 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "input", 79);
+    \u0275\u0275elementStart(0, "input", 83);
     \u0275\u0275controlCreate();
-    \u0275\u0275twoWayListener("ngModelChange", function LoginComponent_div_113_input_8_Template_input_ngModelChange_0_listener($event) {
+    \u0275\u0275twoWayListener("ngModelChange", function LoginComponent_div_114_input_8_Template_input_ngModelChange_0_listener($event) {
       \u0275\u0275restoreView(_r7);
       const ctx_r3 = \u0275\u0275nextContext(2);
       \u0275\u0275twoWayBindingSet(ctx_r3.forgotEmail, $event) || (ctx_r3.forgotEmail = $event);
@@ -324,11 +436,11 @@ function LoginComponent_div_113_input_8_Template(rf, ctx) {
     \u0275\u0275control();
   }
 }
-function LoginComponent_div_113_button_9_Template(rf, ctx) {
+function LoginComponent_div_114_button_9_Template(rf, ctx) {
   if (rf & 1) {
     const _r8 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "button", 70);
-    \u0275\u0275listener("click", function LoginComponent_div_113_button_9_Template_button_click_0_listener() {
+    \u0275\u0275elementStart(0, "button", 84);
+    \u0275\u0275listener("click", function LoginComponent_div_114_button_9_Template_button_click_0_listener() {
       \u0275\u0275restoreView(_r8);
       const ctx_r3 = \u0275\u0275nextContext(2);
       return \u0275\u0275resetView(ctx_r3.sendForgotOtp());
@@ -337,18 +449,18 @@ function LoginComponent_div_113_button_9_Template(rf, ctx) {
     \u0275\u0275elementEnd();
   }
 }
-function LoginComponent_div_113_div_10_input_4_Template(rf, ctx) {
+function LoginComponent_div_114_div_10_input_4_Template(rf, ctx) {
   if (rf & 1) {
     const _r10 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "input", 83);
+    \u0275\u0275elementStart(0, "input", 88);
     \u0275\u0275controlCreate();
-    \u0275\u0275twoWayListener("ngModelChange", function LoginComponent_div_113_div_10_input_4_Template_input_ngModelChange_0_listener($event) {
+    \u0275\u0275twoWayListener("ngModelChange", function LoginComponent_div_114_div_10_input_4_Template_input_ngModelChange_0_listener($event) {
       const i_r11 = \u0275\u0275restoreView(_r10).index;
       const ctx_r3 = \u0275\u0275nextContext(3);
       \u0275\u0275twoWayBindingSet(ctx_r3.otp[i_r11], $event) || (ctx_r3.otp[i_r11] = $event);
       return \u0275\u0275resetView($event);
     });
-    \u0275\u0275listener("input", function LoginComponent_div_113_div_10_input_4_Template_input_input_0_listener() {
+    \u0275\u0275listener("input", function LoginComponent_div_114_div_10_input_4_Template_input_input_0_listener() {
       const i_r11 = \u0275\u0275restoreView(_r10).index;
       const ctx_r3 = \u0275\u0275nextContext(3);
       return \u0275\u0275resetView(ctx_r3.otp[i_r11] = ctx_r3.otp[i_r11].replace(/[^0-9]/g, "").slice(-1));
@@ -363,17 +475,17 @@ function LoginComponent_div_113_div_10_input_4_Template(rf, ctx) {
     \u0275\u0275control();
   }
 }
-function LoginComponent_div_113_div_10_Template(rf, ctx) {
+function LoginComponent_div_114_div_10_Template(rf, ctx) {
   if (rf & 1) {
     const _r9 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 80)(1, "p");
+    \u0275\u0275elementStart(0, "div", 85)(1, "p");
     \u0275\u0275text(2, "Enter the 6-digit OTP");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(3, "div", 81);
-    \u0275\u0275template(4, LoginComponent_div_113_div_10_input_4_Template, 1, 2, "input", 82);
+    \u0275\u0275elementStart(3, "div", 86);
+    \u0275\u0275template(4, LoginComponent_div_114_div_10_input_4_Template, 1, 2, "input", 87);
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(5, "button", 70);
-    \u0275\u0275listener("click", function LoginComponent_div_113_div_10_Template_button_click_5_listener() {
+    \u0275\u0275elementStart(5, "button", 84);
+    \u0275\u0275listener("click", function LoginComponent_div_114_div_10_Template_button_click_5_listener() {
       \u0275\u0275restoreView(_r9);
       const ctx_r3 = \u0275\u0275nextContext(2);
       return \u0275\u0275resetView(ctx_r3.verifyOtp());
@@ -387,21 +499,21 @@ function LoginComponent_div_113_div_10_Template(rf, ctx) {
     \u0275\u0275property("ngForOf", ctx_r3.otp);
   }
 }
-function LoginComponent_div_113_Template(rf, ctx) {
+function LoginComponent_div_114_Template(rf, ctx) {
   if (rf & 1) {
     const _r6 = \u0275\u0275getCurrentView();
-    \u0275\u0275elementStart(0, "div", 58);
-    \u0275\u0275listener("click", function LoginComponent_div_113_Template_div_click_0_listener() {
+    \u0275\u0275elementStart(0, "div", 62);
+    \u0275\u0275listener("click", function LoginComponent_div_114_Template_div_click_0_listener() {
       \u0275\u0275restoreView(_r6);
       const ctx_r3 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r3.closeForgotPassword());
     });
-    \u0275\u0275elementStart(1, "div", 73);
-    \u0275\u0275listener("click", function LoginComponent_div_113_Template_div_click_1_listener($event) {
+    \u0275\u0275elementStart(1, "div", 77);
+    \u0275\u0275listener("click", function LoginComponent_div_114_Template_div_click_1_listener($event) {
       return $event.stopPropagation();
     });
-    \u0275\u0275elementStart(2, "button", 60);
-    \u0275\u0275listener("click", function LoginComponent_div_113_Template_button_click_2_listener() {
+    \u0275\u0275elementStart(2, "button", 64);
+    \u0275\u0275listener("click", function LoginComponent_div_114_Template_button_click_2_listener() {
       \u0275\u0275restoreView(_r6);
       const ctx_r3 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r3.closeForgotPassword());
@@ -411,12 +523,12 @@ function LoginComponent_div_113_Template(rf, ctx) {
     \u0275\u0275elementStart(4, "h2");
     \u0275\u0275text(5, "Forgot Password?");
     \u0275\u0275elementEnd();
-    \u0275\u0275elementStart(6, "p", 74);
+    \u0275\u0275elementStart(6, "p", 78);
     \u0275\u0275text(7, " Enter your registered email to reset your password. ");
     \u0275\u0275elementEnd();
-    \u0275\u0275template(8, LoginComponent_div_113_input_8_Template, 1, 1, "input", 75)(9, LoginComponent_div_113_button_9_Template, 2, 0, "button", 76)(10, LoginComponent_div_113_div_10_Template, 7, 1, "div", 77);
-    \u0275\u0275elementStart(11, "button", 78);
-    \u0275\u0275listener("click", function LoginComponent_div_113_Template_button_click_11_listener() {
+    \u0275\u0275template(8, LoginComponent_div_114_input_8_Template, 1, 1, "input", 79)(9, LoginComponent_div_114_button_9_Template, 2, 0, "button", 80)(10, LoginComponent_div_114_div_10_Template, 7, 1, "div", 81);
+    \u0275\u0275elementStart(11, "button", 82);
+    \u0275\u0275listener("click", function LoginComponent_div_114_Template_button_click_11_listener() {
       \u0275\u0275restoreView(_r6);
       const ctx_r3 = \u0275\u0275nextContext();
       return \u0275\u0275resetView(ctx_r3.closeForgotPassword());
@@ -435,10 +547,14 @@ function LoginComponent_div_113_Template(rf, ctx) {
   }
 }
 var LoginComponent = class _LoginComponent {
-  constructor(router) {
+  constructor(router, authService, cdr) {
     this.router = router;
+    this.authService = authService;
+    this.cdr = cdr;
   }
   router;
+  authService;
+  cdr;
   username = "";
   password = "";
   rememberMe = false;
@@ -447,6 +563,9 @@ var LoginComponent = class _LoginComponent {
   forgotEmail = "";
   forgotOtp = "";
   errorMessage = "";
+  successMessage = "";
+  signupError = "";
+  isLoggingIn = false;
   otpSent = false;
   otp = ["", "", "", "", "", ""];
   showSignup = false;
@@ -470,6 +589,7 @@ var LoginComponent = class _LoginComponent {
   ];
   currentSlide = 0;
   sliderInterval;
+  isSigningUp = false;
   ngOnInit() {
     this.startSliderTimer();
   }
@@ -491,10 +611,14 @@ var LoginComponent = class _LoginComponent {
   }
   openSignup(event) {
     event.preventDefault();
+    this.successMessage = "";
+    this.errorMessage = "";
+    this.signupError = "";
     this.showSignup = true;
   }
   closeSignup() {
     this.showSignup = false;
+    this.signupError = "";
   }
   openForgotPassword(event) {
     event.preventDefault();
@@ -522,27 +646,91 @@ var LoginComponent = class _LoginComponent {
     alert("OTP verification API connect \u0B9A\u0BC6\u0BAF\u0BCD\u0BAF \u0BB5\u0BC7\u0BA3\u0BCD\u0B9F\u0BC1\u0BAE\u0BCD.");
   }
   submitSignup() {
+    this.signupError = "";
     if (!this.signupData.fullName.trim() || !this.signupData.username.trim() || !this.signupData.email.trim() || !this.signupData.mobile.trim() || !this.signupData.createPassword || !this.signupData.confirmPassword) {
-      alert("Please fill all fields");
+      this.signupError = "Please fill all fields";
+      this.cdr.detectChanges();
       return;
     }
-    if (!/^\d{10}$/.test(this.signupData.mobile)) {
-      alert("Enter a valid 10-digit mobile number");
+    if (!/^\d{10,15}$/.test(this.signupData.mobile.trim())) {
+      this.signupError = "Enter a valid 10-digit mobile number";
+      this.cdr.detectChanges();
+      return;
+    }
+    if (this.signupData.createPassword.length < 8) {
+      this.signupError = "Password must contain at least 8 characters";
+      this.cdr.detectChanges();
       return;
     }
     if (this.signupData.createPassword !== this.signupData.confirmPassword) {
-      alert("Passwords do not match");
+      this.signupError = "Passwords do not match";
+      this.cdr.detectChanges();
       return;
     }
-    alert("All fields validated successfully!");
+    const payload = {
+      fullName: this.signupData.fullName.trim(),
+      username: this.signupData.username.trim(),
+      email: this.signupData.email.trim(),
+      mobileNumber: this.signupData.mobile.trim(),
+      password: this.signupData.createPassword,
+      confirmPassword: this.signupData.confirmPassword
+    };
+    this.isSigningUp = true;
+    this.cdr.detectChanges();
+    this.authService.signup(payload).subscribe({
+      next: (response) => {
+        this.isSigningUp = false;
+        this.showSignup = false;
+        this.signupError = "";
+        this.username = payload.username;
+        this.password = payload.password;
+        this.successMessage = "Account created successfully! Please click Login to continue to your Dashboard.";
+        this.errorMessage = "";
+        this.signupData = {
+          fullName: "",
+          username: "",
+          email: "",
+          mobile: "",
+          createPassword: "",
+          confirmPassword: ""
+        };
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.isSigningUp = false;
+        const msg = error.error?.message || (error.status === 0 ? "Cannot reach backend server. Please verify port 5000 is running." : "Signup failed. Please try again.");
+        this.signupError = msg;
+        this.cdr.detectChanges();
+      }
+    });
   }
   loginUser() {
-    if (!this.username || !this.password) {
+    if (!this.username.trim() || !this.password) {
       this.errorMessage = "Please enter your username and password";
+      this.successMessage = "";
+      this.cdr.detectChanges();
       return;
     }
     this.errorMessage = "";
-    this.router.navigate(["/dashboard"]);
+    this.isLoggingIn = true;
+    this.cdr.detectChanges();
+    this.authService.login({
+      username: this.username.trim(),
+      password: this.password
+    }).subscribe({
+      next: (res) => {
+        this.isLoggingIn = false;
+        this.errorMessage = "";
+        this.successMessage = "";
+        this.cdr.detectChanges();
+        this.router.navigate(["/dashboard"]);
+      },
+      error: (err) => {
+        this.isLoggingIn = false;
+        this.errorMessage = err.error?.message || "Invalid username or password";
+        this.cdr.detectChanges();
+      }
+    });
   }
   refreshPage() {
     window.location.reload();
@@ -553,9 +741,9 @@ var LoginComponent = class _LoginComponent {
     }
   }
   static \u0275fac = function LoginComponent_Factory(__ngFactoryType__) {
-    return new (__ngFactoryType__ || _LoginComponent)(\u0275\u0275directiveInject(Router));
+    return new (__ngFactoryType__ || _LoginComponent)(\u0275\u0275directiveInject(Router), \u0275\u0275directiveInject(AuthService), \u0275\u0275directiveInject(ChangeDetectorRef));
   };
-  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _LoginComponent, selectors: [["app-login"]], decls: 114, vars: 13, consts: [[1, "page"], [1, "site-header"], [1, "header-brand"], ["src", "/asset/logo.png", "alt", "Sanmarkkam Logo"], [1, "header-badge"], ["src", "/asset/logo111.png", "alt", "Logo"], [1, "content-layout"], [1, "left"], ["aria-hidden", "true", 1, "dots"], [1, "message"], [1, "impact-tags"], [1, "impact-tag"], [1, "photo-slider"], [1, "slides-track"], ["class", "slide", 4, "ngFor", "ngForOf"], [1, "wave"], [1, "slider-dots"], ["type", "button", 3, "active", "click", 4, "ngFor", "ngForOf"], [1, "right"], [1, "right-container"], [1, "card"], [1, "welcome"], [1, "desc"], [3, "ngSubmit"], ["class", "login-error-banner", 4, "ngIf"], [1, "input-box"], ["for", "username"], ["id", "username", "name", "username", "type", "text", "placeholder", "Enter username", "autocomplete", "username", "required", "", 3, "ngModelChange", "ngModel"], ["for", "password"], [1, "password-wrapper"], ["id", "password", "name", "password", "placeholder", "Enter password", "autocomplete", "current-password", "required", "", 3, "ngModelChange", "type", "ngModel"], ["type", "button", "aria-label", "Show or hide password", 1, "eye", 3, "click"], ["xmlns", "http://www.w3.org/2000/svg", "width", "19", "height", "19", "viewBox", "0 0 24 24", "fill", "none", "stroke", "currentColor", "stroke-width", "1.8", "stroke-linecap", "round", "stroke-linejoin", "round", 4, "ngIf"], [1, "remember-row"], [1, "remember-label"], ["type", "checkbox", "name", "rememberMe", 3, "ngModelChange", "ngModel"], ["href", "#", 1, "forgot-link", 3, "click"], ["type", "submit", 1, "login"], [1, "divider"], [1, "signup-text"], ["href", "#", 3, "click"], [1, "tamil-quote"], [1, "lamp"], ["class", "modal-overlay", 3, "click", 4, "ngIf"], [1, "slide"], ["alt", "Helping person", 3, "src"], ["type", "button", 3, "click"], [1, "login-error-banner"], ["width", "18", "height", "18", "viewBox", "0 0 24 24", "fill", "none", "stroke", "currentColor", "stroke-width", "2", "stroke-linecap", "round", "stroke-linejoin", "round"], ["cx", "12", "cy", "12", "r", "10"], ["x1", "12", "y1", "8", "x2", "12", "y2", "12"], ["x1", "12", "y1", "16", "x2", "12.01", "y2", "16"], ["xmlns", "http://www.w3.org/2000/svg", "width", "19", "height", "19", "viewBox", "0 0 24 24", "fill", "none", "stroke", "currentColor", "stroke-width", "1.8", "stroke-linecap", "round", "stroke-linejoin", "round"], ["d", "M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"], ["cx", "12", "cy", "12", "r", "3"], ["d", "M3 3l18 18"], ["d", "M10.6 5.2A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a16 16 0 0 1-3.2 4.1"], ["d", "M6.2 6.2C3.5 8 2 12 2 12s3.6 7 10 7c1.5 0 2.8-.4 4-1"], [1, "modal-overlay", 3, "click"], [1, "signup-popup", 3, "click"], ["type", "button", 1, "close-btn", 3, "click"], ["type", "text", "placeholder", "Enter full name", "name", "fullName", 3, "ngModelChange", "ngModel"], ["type", "text", "placeholder", "Enter username", "name", "username", 3, "ngModelChange", "ngModel"], ["type", "email", "placeholder", "Enter email address", "name", "email", 3, "ngModelChange", "ngModel"], ["type", "tel", "placeholder", "Enter mobile number", "name", "mobile", "maxlength", "10", 3, "ngModelChange", "ngModel"], [1, "password-field"], ["placeholder", "Create password", "name", "createPassword", 3, "ngModelChange", "type", "ngModel"], ["type", "button", 1, "password-eye", 3, "click"], ["viewBox", "0 0 24 24", "width", "20", "height", "20", "fill", "none", "stroke", "currentColor", "stroke-width", "1.8", 4, "ngIf"], ["placeholder", "Confirm password", "name", "confirmPassword", 3, "ngModelChange", "type", "ngModel"], ["type", "button", 1, "signup-submit", 3, "click"], ["viewBox", "0 0 24 24", "width", "20", "height", "20", "fill", "none", "stroke", "currentColor", "stroke-width", "1.8"], ["d", "M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"], [1, "signup-popup", "forgot-popup", 3, "click"], [1, "forgot-description"], ["type", "email", "name", "forgotEmail", "placeholder", "Enter your email", 3, "ngModel", "ngModelChange", 4, "ngIf"], ["type", "button", "class", "signup-submit", 3, "click", 4, "ngIf"], ["class", "otp-section", 4, "ngIf"], ["type", "button", 1, "back-login", 3, "click"], ["type", "email", "name", "forgotEmail", "placeholder", "Enter your email", 3, "ngModelChange", "ngModel"], [1, "otp-section"], [1, "otp-boxes"], ["type", "text", "inputmode", "numeric", "maxlength", "1", "class", "otp-input", 3, "ngModel", "name", "ngModelChange", "input", 4, "ngFor", "ngForOf"], ["type", "text", "inputmode", "numeric", "maxlength", "1", 1, "otp-input", 3, "ngModelChange", "input", "ngModel", "name"]], template: function LoginComponent_Template(rf, ctx) {
+  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _LoginComponent, selectors: [["app-login"]], decls: 115, vars: 16, consts: [[1, "page"], [1, "site-header"], [1, "header-brand"], ["src", "/asset/logo.png", "alt", "Sanmarkkam Logo"], [1, "header-badge"], ["src", "/asset/logo111.png", "alt", "Logo"], [1, "content-layout"], [1, "left"], ["aria-hidden", "true", 1, "dots"], [1, "message"], [1, "impact-tags"], [1, "impact-tag"], [1, "photo-slider"], [1, "slides-track"], ["class", "slide", 4, "ngFor", "ngForOf"], [1, "wave"], [1, "slider-dots"], ["type", "button", 3, "active", "click", 4, "ngFor", "ngForOf"], [1, "right"], [1, "right-container"], [1, "card"], [1, "welcome"], [1, "desc"], [3, "ngSubmit"], ["class", "login-success-banner", 4, "ngIf"], ["class", "login-error-banner", 4, "ngIf"], [1, "input-box"], ["for", "username"], ["id", "username", "name", "username", "type", "text", "placeholder", "Enter username", "autocomplete", "username", "required", "", 3, "ngModelChange", "ngModel"], ["for", "password"], [1, "password-wrapper"], ["id", "password", "name", "password", "placeholder", "Enter password", "autocomplete", "current-password", "required", "", 3, "ngModelChange", "type", "ngModel"], ["type", "button", "aria-label", "Show or hide password", 1, "eye", 3, "click"], ["xmlns", "http://www.w3.org/2000/svg", "width", "19", "height", "19", "viewBox", "0 0 24 24", "fill", "none", "stroke", "currentColor", "stroke-width", "1.8", "stroke-linecap", "round", "stroke-linejoin", "round", 4, "ngIf"], [1, "remember-row"], [1, "remember-label"], ["type", "checkbox", "name", "rememberMe", 3, "ngModelChange", "ngModel"], ["href", "#", 1, "forgot-link", 3, "click"], ["type", "submit", 1, "login", 3, "disabled"], [1, "divider"], [1, "signup-text"], ["href", "#", 3, "click"], [1, "tamil-quote"], [1, "lamp"], ["class", "modal-overlay", 3, "click", 4, "ngIf"], [1, "slide"], ["alt", "Helping person", 3, "src"], ["type", "button", 3, "click"], [1, "login-success-banner"], ["width", "18", "height", "18", "viewBox", "0 0 24 24", "fill", "none", "stroke", "currentColor", "stroke-width", "2", "stroke-linecap", "round", "stroke-linejoin", "round"], ["d", "M22 11.08V12a10 10 0 1 1-5.93-9.14"], ["points", "22 4 12 14.01 9 11.01"], [1, "login-error-banner"], ["cx", "12", "cy", "12", "r", "10"], ["x1", "12", "y1", "8", "x2", "12", "y2", "12"], ["x1", "12", "y1", "16", "x2", "12.01", "y2", "16"], ["xmlns", "http://www.w3.org/2000/svg", "width", "19", "height", "19", "viewBox", "0 0 24 24", "fill", "none", "stroke", "currentColor", "stroke-width", "1.8", "stroke-linecap", "round", "stroke-linejoin", "round"], ["d", "M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"], ["cx", "12", "cy", "12", "r", "3"], ["d", "M3 3l18 18"], ["d", "M10.6 5.2A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a16 16 0 0 1-3.2 4.1"], ["d", "M6.2 6.2C3.5 8 2 12 2 12s3.6 7 10 7c1.5 0 2.8-.4 4-1"], [1, "modal-overlay", 3, "click"], [1, "signup-popup", 3, "click"], ["type", "button", 1, "close-btn", 3, "click"], ["type", "text", "placeholder", "Enter full name", "name", "fullName", 3, "ngModelChange", "ngModel"], ["type", "text", "placeholder", "Enter username", "name", "username", 3, "ngModelChange", "ngModel"], ["type", "email", "placeholder", "Enter email address", "name", "email", 3, "ngModelChange", "ngModel"], ["type", "tel", "placeholder", "Enter mobile number", "name", "mobile", "maxlength", "10", 3, "ngModelChange", "ngModel"], [1, "password-field"], ["placeholder", "Create password", "name", "createPassword", 3, "ngModelChange", "type", "ngModel"], ["type", "button", 1, "password-eye", 3, "click"], ["viewBox", "0 0 24 24", "width", "20", "height", "20", "fill", "none", "stroke", "currentColor", "stroke-width", "1.8", 4, "ngIf"], ["placeholder", "Confirm password", "name", "confirmPassword", 3, "ngModelChange", "type", "ngModel"], ["type", "button", 1, "signup-submit", 3, "click", "disabled"], ["viewBox", "0 0 24 24", "width", "20", "height", "20", "fill", "none", "stroke", "currentColor", "stroke-width", "1.8"], ["d", "M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"], [1, "signup-popup", "forgot-popup", 3, "click"], [1, "forgot-description"], ["type", "email", "name", "forgotEmail", "placeholder", "Enter your email", 3, "ngModel", "ngModelChange", 4, "ngIf"], ["type", "button", "class", "signup-submit", 3, "click", 4, "ngIf"], ["class", "otp-section", 4, "ngIf"], ["type", "button", 1, "back-login", 3, "click"], ["type", "email", "name", "forgotEmail", "placeholder", "Enter your email", 3, "ngModelChange", "ngModel"], ["type", "button", 1, "signup-submit", 3, "click"], [1, "otp-section"], [1, "otp-boxes"], ["type", "text", "inputmode", "numeric", "maxlength", "1", "class", "otp-input", 3, "ngModel", "name", "ngModelChange", "input", 4, "ngFor", "ngForOf"], ["type", "text", "inputmode", "numeric", "maxlength", "1", 1, "otp-input", 3, "ngModelChange", "input", "ngModel", "name"]], template: function LoginComponent_Template(rf, ctx) {
     if (rf & 1) {
       \u0275\u0275elementStart(0, "div", 0)(1, "header", 1)(2, "div", 2);
       \u0275\u0275element(3, "img", 3);
@@ -626,80 +814,80 @@ var LoginComponent = class _LoginComponent {
       \u0275\u0275listener("ngSubmit", function LoginComponent_Template_form_ngSubmit_70_listener() {
         return ctx.loginUser();
       });
-      \u0275\u0275template(71, LoginComponent_div_71_Template, 7, 1, "div", 24);
-      \u0275\u0275elementStart(72, "div", 25)(73, "label", 26);
-      \u0275\u0275text(74, "Username");
+      \u0275\u0275template(71, LoginComponent_div_71_Template, 6, 1, "div", 24)(72, LoginComponent_div_72_Template, 7, 1, "div", 25);
+      \u0275\u0275elementStart(73, "div", 26)(74, "label", 27);
+      \u0275\u0275text(75, "Username");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(75, "input", 27);
+      \u0275\u0275elementStart(76, "input", 28);
       \u0275\u0275controlCreate();
-      \u0275\u0275twoWayListener("ngModelChange", function LoginComponent_Template_input_ngModelChange_75_listener($event) {
+      \u0275\u0275twoWayListener("ngModelChange", function LoginComponent_Template_input_ngModelChange_76_listener($event) {
         \u0275\u0275twoWayBindingSet(ctx.username, $event) || (ctx.username = $event);
         return $event;
       });
       \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(76, "div", 25)(77, "label", 28);
-      \u0275\u0275text(78, "Password");
+      \u0275\u0275elementStart(77, "div", 26)(78, "label", 29);
+      \u0275\u0275text(79, "Password");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(79, "div", 29)(80, "input", 30);
+      \u0275\u0275elementStart(80, "div", 30)(81, "input", 31);
       \u0275\u0275controlCreate();
-      \u0275\u0275twoWayListener("ngModelChange", function LoginComponent_Template_input_ngModelChange_80_listener($event) {
+      \u0275\u0275twoWayListener("ngModelChange", function LoginComponent_Template_input_ngModelChange_81_listener($event) {
         \u0275\u0275twoWayBindingSet(ctx.password, $event) || (ctx.password = $event);
         return $event;
       });
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(81, "button", 31);
-      \u0275\u0275listener("click", function LoginComponent_Template_button_click_81_listener() {
+      \u0275\u0275elementStart(82, "button", 32);
+      \u0275\u0275listener("click", function LoginComponent_Template_button_click_82_listener() {
         return ctx.togglePassword();
       });
-      \u0275\u0275template(82, LoginComponent__svg_svg_82_Template, 3, 0, "svg", 32)(83, LoginComponent__svg_svg_83_Template, 4, 0, "svg", 32);
+      \u0275\u0275template(83, LoginComponent__svg_svg_83_Template, 3, 0, "svg", 33)(84, LoginComponent__svg_svg_84_Template, 4, 0, "svg", 33);
       \u0275\u0275elementEnd()()();
-      \u0275\u0275elementStart(84, "div", 33)(85, "label", 34)(86, "input", 35);
+      \u0275\u0275elementStart(85, "div", 34)(86, "label", 35)(87, "input", 36);
       \u0275\u0275controlCreate();
-      \u0275\u0275twoWayListener("ngModelChange", function LoginComponent_Template_input_ngModelChange_86_listener($event) {
+      \u0275\u0275twoWayListener("ngModelChange", function LoginComponent_Template_input_ngModelChange_87_listener($event) {
         \u0275\u0275twoWayBindingSet(ctx.rememberMe, $event) || (ctx.rememberMe = $event);
         return $event;
       });
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(87, "span");
-      \u0275\u0275text(88, "Remember me");
+      \u0275\u0275elementStart(88, "span");
+      \u0275\u0275text(89, "Remember me");
       \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(89, "a", 36);
-      \u0275\u0275listener("click", function LoginComponent_Template_a_click_89_listener($event) {
+      \u0275\u0275elementStart(90, "a", 37);
+      \u0275\u0275listener("click", function LoginComponent_Template_a_click_90_listener($event) {
         return ctx.openForgotPassword($event);
       });
-      \u0275\u0275text(90, " Forgot password?\n");
+      \u0275\u0275text(91, " Forgot password?\n");
       \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(91, "button", 37);
-      \u0275\u0275text(92, " Login \xA0 \u2192 ");
+      \u0275\u0275elementStart(92, "button", 38);
+      \u0275\u0275text(93);
       \u0275\u0275elementEnd()();
-      \u0275\u0275elementStart(93, "div", 38);
-      \u0275\u0275element(94, "span");
-      \u0275\u0275elementStart(95, "div");
-      \u0275\u0275text(96, "OR");
+      \u0275\u0275elementStart(94, "div", 39);
+      \u0275\u0275element(95, "span");
+      \u0275\u0275elementStart(96, "div");
+      \u0275\u0275text(97, "OR");
       \u0275\u0275elementEnd();
-      \u0275\u0275element(97, "span");
+      \u0275\u0275element(98, "span");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(98, "div", 39);
-      \u0275\u0275text(99, " Don't have an account? ");
-      \u0275\u0275elementStart(100, "a", 40);
-      \u0275\u0275listener("click", function LoginComponent_Template_a_click_100_listener($event) {
+      \u0275\u0275elementStart(99, "div", 40);
+      \u0275\u0275text(100, " Don't have an account? ");
+      \u0275\u0275elementStart(101, "a", 41);
+      \u0275\u0275listener("click", function LoginComponent_Template_a_click_101_listener($event) {
         return ctx.openSignup($event);
       });
-      \u0275\u0275text(101, "Sign Up");
+      \u0275\u0275text(102, "Sign Up");
       \u0275\u0275elementEnd()();
-      \u0275\u0275element(102, "br");
-      \u0275\u0275elementStart(103, "div", 41)(104, "span", 42);
-      \u0275\u0275text(105, "\u{1FA94}");
+      \u0275\u0275element(103, "br");
+      \u0275\u0275elementStart(104, "div", 42)(105, "span", 43);
+      \u0275\u0275text(106, "\u{1FA94}");
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(106, "p");
-      \u0275\u0275text(107, '"\u0B85\u0BB1\u0BBF\u0BB5\u0BC1 \u0BB5\u0BBF\u0BB3\u0B99\u0BCD\u0B95\u0BBF\u0BAF \u0B9C\u0BC0\u0BB5\u0BB0\u0BCD\u0B95\u0BB3\u0BC1\u0B95\u0BCD\u0B95\u0BC1');
-      \u0275\u0275element(108, "br");
-      \u0275\u0275text(109, ' \u0B9C\u0BC0\u0BB5\u0B95\u0BBE\u0BB0\u0BC1\u0BA3\u0BCD\u0BAF\u0BAE\u0BC7 \u0B95\u0B9F\u0BB5\u0BC1\u0BB3\u0BCD \u0BB5\u0BB4\u0BBF\u0BAA\u0BBE\u0B9F\u0BC1"');
+      \u0275\u0275elementStart(107, "p");
+      \u0275\u0275text(108, '"\u0B85\u0BB1\u0BBF\u0BB5\u0BC1 \u0BB5\u0BBF\u0BB3\u0B99\u0BCD\u0B95\u0BBF\u0BAF \u0B9C\u0BC0\u0BB5\u0BB0\u0BCD\u0B95\u0BB3\u0BC1\u0B95\u0BCD\u0B95\u0BC1');
+      \u0275\u0275element(109, "br");
+      \u0275\u0275text(110, ' \u0B9C\u0BC0\u0BB5\u0B95\u0BBE\u0BB0\u0BC1\u0BA3\u0BCD\u0BAF\u0BAE\u0BC7 \u0B95\u0B9F\u0BB5\u0BC1\u0BB3\u0BCD \u0BB5\u0BB4\u0BBF\u0BAA\u0BBE\u0B9F\u0BC1"');
       \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(110, "span", 42);
-      \u0275\u0275text(111, "\u{1FA94}");
+      \u0275\u0275elementStart(111, "span", 43);
+      \u0275\u0275text(112, "\u{1FA94}");
       \u0275\u0275elementEnd()()()()();
-      \u0275\u0275template(112, LoginComponent_div_112_Template, 34, 12, "div", 43)(113, LoginComponent_div_113_Template, 13, 3, "div", 43);
+      \u0275\u0275template(113, LoginComponent_div_113_Template, 35, 15, "div", 44)(114, LoginComponent_div_114_Template, 13, 3, "div", 44);
       \u0275\u0275elementEnd()();
     }
     if (rf & 2) {
@@ -710,6 +898,8 @@ var LoginComponent = class _LoginComponent {
       \u0275\u0275advance(3);
       \u0275\u0275property("ngForOf", ctx.images);
       \u0275\u0275advance(11);
+      \u0275\u0275property("ngIf", ctx.successMessage);
+      \u0275\u0275advance();
       \u0275\u0275property("ngIf", ctx.errorMessage);
       \u0275\u0275advance(4);
       \u0275\u0275twoWayProperty("ngModel", ctx.username);
@@ -725,12 +915,16 @@ var LoginComponent = class _LoginComponent {
       \u0275\u0275advance(3);
       \u0275\u0275twoWayProperty("ngModel", ctx.rememberMe);
       \u0275\u0275control();
-      \u0275\u0275advance(26);
+      \u0275\u0275advance(5);
+      \u0275\u0275property("disabled", ctx.isLoggingIn);
+      \u0275\u0275advance();
+      \u0275\u0275textInterpolate1(" ", ctx.isLoggingIn ? "Logging in..." : "Login \xA0 \u2192", " ");
+      \u0275\u0275advance(20);
       \u0275\u0275property("ngIf", ctx.showSignup);
       \u0275\u0275advance();
       \u0275\u0275property("ngIf", ctx.showForgotPassword);
     }
-  }, dependencies: [FormsModule, \u0275NgNoValidate, DefaultValueAccessor, CheckboxControlValueAccessor, NgControlStatus, NgControlStatusGroup, RequiredValidator, MaxLengthValidator, NgModel, NgForm, CommonModule, NgForOf, NgIf], styles: ['\n*[_ngcontent-%COMP%] {\n  box-sizing: border-box;\n  margin: 0;\n  padding: 0;\n}\n[_nghost-%COMP%] {\n  display: block;\n  width: 100%;\n  min-height: 100vh;\n}\n.page[_ngcontent-%COMP%] {\n  width: 100%;\n  min-height: 100vh;\n  display: flex;\n  font-family:\n    -apple-system,\n    BlinkMacSystemFont,\n    "Segoe UI",\n    Roboto,\n    Helvetica,\n    Arial,\n    sans-serif;\n  background: #ffffff;\n  color: #172033;\n}\n.left[_ngcontent-%COMP%] {\n  width: 52%;\n  min-height: 100vh;\n  position: relative;\n  padding: 44px 6.5%;\n  display: flex;\n  flex-direction: column;\n  background: #ffffff;\n  overflow: hidden;\n}\n.dots[_ngcontent-%COMP%] {\n  position: absolute;\n  top: 36px;\n  right: 40px;\n  display: grid;\n  grid-template-columns: repeat(3, 6px);\n  gap: 8px;\n  opacity: 0.35;\n  z-index: 5;\n  pointer-events: none;\n}\n.dots[_ngcontent-%COMP%]   i[_ngcontent-%COMP%] {\n  display: block;\n  width: 6px;\n  height: 6px;\n  border-radius: 50%;\n  background: #f3b000;\n}\n.brand[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 16px;\n  z-index: 10;\n  position: relative;\n}\n.logo[_ngcontent-%COMP%] {\n  width: 60px;\n  height: 60px;\n  flex-shrink: 0;\n  cursor: pointer;\n  border-radius: 50%;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  transition: transform 0.2s ease;\n}\n.logo[_ngcontent-%COMP%]:hover {\n  transform: scale(1.05);\n}\n.logo[_ngcontent-%COMP%]   img[_ngcontent-%COMP%] {\n  width: 100%;\n  height: 100%;\n  object-fit: contain;\n  display: block;\n}\n.brand-content[_ngcontent-%COMP%] {\n  flex: 1;\n  min-width: 0;\n}\n.brand-content[_ngcontent-%COMP%]   h1[_ngcontent-%COMP%] {\n  font-size: clamp(24px, 2.4vw, 32px);\n  font-weight: 750;\n  color: #14213d;\n  letter-spacing: -0.5px;\n  line-height: 1.2;\n}\n.brand-content[_ngcontent-%COMP%]   h1[_ngcontent-%COMP%]   span[_ngcontent-%COMP%] {\n  color: #f3b000;\n}\n.brand-content[_ngcontent-%COMP%]   p[_ngcontent-%COMP%] {\n  margin-top: 5px;\n  color: #687184;\n  font-size: 13px;\n  line-height: 1.4;\n  font-weight: 500;\n}\n.message[_ngcontent-%COMP%] {\n  position: relative;\n  width: 100%;\n  box-sizing: border-box;\n  padding: 12px 32px 16px 48px;\n  margin: 0;\n  text-align: left;\n  z-index: 2;\n}\n.message[_ngcontent-%COMP%]   h2[_ngcontent-%COMP%] {\n  margin: 0 0 10px;\n  padding: 0;\n  font-size: 36px;\n  font-weight: 800;\n  line-height: 1.2;\n  letter-spacing: -0.5px;\n  color: #172B4D;\n}\n.message[_ngcontent-%COMP%]   h2[_ngcontent-%COMP%]   span[_ngcontent-%COMP%] {\n  color: #F5A900;\n}\n.impact-tags[_ngcontent-%COMP%] {\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  justify-content: flex-start;\n  gap: 10px 18px;\n  margin: 0;\n  padding: 0;\n}\n.impact-tag[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  margin: 0;\n  padding: 0;\n  font-size: 13px;\n  line-height: 1.5;\n  white-space: nowrap;\n  color: #263858;\n}\n.impact-tag[_ngcontent-%COMP%]   b[_ngcontent-%COMP%] {\n  color: #F5A900;\n  font-weight: 800;\n}\n.photo-slider[_ngcontent-%COMP%] {\n  position: absolute;\n  left: 0;\n  bottom: 0;\n  width: 100%;\n  height: 56%;\n  overflow: hidden;\n  z-index: 2;\n}\n.slides-track[_ngcontent-%COMP%] {\n  display: flex;\n  width: 100%;\n  height: 100%;\n  transition: transform 0.85s cubic-bezier(0.25, 1, 0.5, 1);\n  will-change: transform;\n}\n.slide[_ngcontent-%COMP%] {\n  flex: 0 0 100%;\n  width: 100%;\n  height: 100%;\n  position: relative;\n  overflow: hidden;\n}\n.slide[_ngcontent-%COMP%]   img[_ngcontent-%COMP%] {\n  width: 100%;\n  height: 100%;\n  object-fit: cover;\n  object-position: center 35%;\n  display: block;\n}\n.wave[_ngcontent-%COMP%] {\n  position: absolute;\n  left: -5%;\n  bottom: -92%;\n  width: 110%;\n  height: 115%;\n  background: #ffd33d;\n  border-radius: 50%;\n  z-index: 5;\n  pointer-events: none;\n}\n.slider-dots[_ngcontent-%COMP%] {\n  position: absolute;\n  z-index: 10;\n  bottom: 16px;\n  left: 50%;\n  transform: translateX(-50%);\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}\n.slider-dots[_ngcontent-%COMP%]   button[_ngcontent-%COMP%] {\n  width: 8px;\n  height: 8px;\n  padding: 0;\n  border: none;\n  border-radius: 50%;\n  background: rgba(255, 255, 255, 0.85);\n  cursor: pointer;\n  transition: all 0.25s ease;\n}\n.slider-dots[_ngcontent-%COMP%]   button.active[_ngcontent-%COMP%] {\n  width: 22px;\n  border-radius: 10px;\n  background: #14213d;\n}\n.right[_ngcontent-%COMP%] {\n  width: 48%;\n  min-height: 100vh;\n  padding: 40px 32px;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  overflow-y: auto;\n  background:\n    radial-gradient(\n      circle at top left,\n      #fff8dc 0%,\n      transparent 55%),\n    #ffffff;\n}\n.right-container[_ngcontent-%COMP%] {\n  width: 100%;\n  max-width: 440px;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  margin: auto 0;\n}\n.logo-container[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n  margin-bottom: 20px;\n  padding: 8px 14px;\n  background: #ffffff;\n  border: 1px solid #f2e9cb;\n  border-radius: 40px;\n  box-shadow: 0 4px 16px rgba(20, 33, 61, 0.05);\n}\n.company-logo[_ngcontent-%COMP%] {\n  width: 60px;\n  height: 60px;\n  object-fit: contain;\n  border-radius: 50%;\n  display: block;\n}\n.logo-text[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  text-align: left;\n}\n.logo-sub[_ngcontent-%COMP%] {\n  font-size: 11.5px;\n  font-weight: 600;\n  color: #7b8494;\n  line-height: 1.25;\n}\n.logo-main[_ngcontent-%COMP%] {\n  font-size: 14.5px;\n  font-weight: 750;\n  color: #14213d;\n  line-height: 1.25;\n}\n.card[_ngcontent-%COMP%] {\n  width: 100%;\n  background: #ffffff;\n  border: 1.5px solid #f2ece0;\n  border-radius: 20px;\n  padding: 34px 34px 28px;\n  box-shadow: 0 16px 45px rgba(20, 33, 61, 0.07), 0 2px 8px rgba(20, 33, 61, 0.03);\n}\n.welcome[_ngcontent-%COMP%] {\n  color: #d49b00;\n  font-size: 11px;\n  font-weight: 750;\n  letter-spacing: 1px;\n  text-transform: uppercase;\n  margin-bottom: 4px;\n}\n.card[_ngcontent-%COMP%]   h2[_ngcontent-%COMP%] {\n  font-size: 28px;\n  font-weight: 800;\n  color: #14213d;\n  margin-bottom: 6px;\n  letter-spacing: -0.4px;\n}\n.desc[_ngcontent-%COMP%] {\n  color: #687184;\n  font-size: 13.5px;\n  line-height: 1.5;\n  margin-bottom: 22px;\n}\n.input-box[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  margin-bottom: 16px;\n}\n.input-box[_ngcontent-%COMP%]   label[_ngcontent-%COMP%] {\n  display: block;\n  margin-bottom: 6px;\n  font-size: 13px;\n  font-weight: 600;\n  color: #2d3748;\n}\n.input-box[_ngcontent-%COMP%]   input[_ngcontent-%COMP%] {\n  width: 100%;\n  height: 46px;\n  box-sizing: border-box;\n  padding: 0 14px;\n  border: 1.5px solid #e2e8f0;\n  border-radius: 10px;\n  font-size: 14.5px;\n  color: #1a202c;\n  background: #ffffff;\n  outline: none;\n  transition: border-color 0.2s ease, box-shadow 0.2s ease;\n}\n.input-box[_ngcontent-%COMP%]   input[_ngcontent-%COMP%]::placeholder {\n  color: #a0aec0;\n}\n.input-box[_ngcontent-%COMP%]   input[_ngcontent-%COMP%]:focus {\n  border-color: #f0b600;\n  box-shadow: 0 0 0 3px rgba(240, 182, 0, 0.16);\n}\n.password-wrapper[_ngcontent-%COMP%] {\n  position: relative;\n  display: flex;\n  align-items: center;\n  width: 100%;\n}\n.password-wrapper[_ngcontent-%COMP%]   input[_ngcontent-%COMP%] {\n  padding-right: 44px;\n}\n.password-wrapper[_ngcontent-%COMP%]   .eye[_ngcontent-%COMP%] {\n  position: absolute;\n  right: 12px;\n  top: 50%;\n  transform: translateY(-50%);\n  border: none;\n  background: transparent;\n  cursor: pointer;\n  color: #718096;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 4px;\n  border-radius: 4px;\n  outline: none;\n  transition: color 0.15s ease;\n}\n.password-wrapper[_ngcontent-%COMP%]   .eye[_ngcontent-%COMP%]:hover {\n  color: #14213d;\n}\n.password-wrapper[_ngcontent-%COMP%]   .eye[_ngcontent-%COMP%]:focus-visible {\n  outline: 2px solid #f4b400;\n}\n.remember-row[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  margin: 4px 0 20px;\n}\n.remember-label[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 8px;\n  font-size: 13px;\n  color: #4a5568;\n  cursor: pointer;\n  -webkit-user-select: none;\n  user-select: none;\n}\n.remember-label[_ngcontent-%COMP%]   input[type=checkbox][_ngcontent-%COMP%] {\n  width: 15px;\n  height: 15px;\n  accent-color: #f5b400;\n  cursor: pointer;\n  margin: 0;\n}\n.forgot-link[_ngcontent-%COMP%] {\n  color: #d49b00;\n  font-size: 13px;\n  font-weight: 600;\n  text-decoration: none;\n  transition: color 0.15s ease;\n}\n.forgot-link[_ngcontent-%COMP%]:hover {\n  color: #b58400;\n  text-decoration: underline;\n}\n.login[_ngcontent-%COMP%] {\n  width: 100%;\n  height: 48px;\n  border: none;\n  border-radius: 10px;\n  background:\n    linear-gradient(\n      90deg,\n      #F9E662,\n      #ffd83e);\n  font-size: 15px;\n  font-weight: 700;\n  color: #172033;\n  cursor: pointer;\n  box-shadow: 0 8px 20px rgba(238, 180, 0, 0.24);\n  transition:\n    transform 0.15s ease,\n    box-shadow 0.15s ease,\n    background 0.2s ease;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  gap: 8px;\n}\n.login[_ngcontent-%COMP%]:hover {\n  transform: translateY(-2px);\n  box-shadow: 0 12px 24px rgba(238, 180, 0, 0.32);\n  background:\n    linear-gradient(\n      90deg,\n      #f5bc00,\n      #ffcf29);\n}\n.login[_ngcontent-%COMP%]:active {\n  transform: translateY(0);\n}\n.signup-text[_ngcontent-%COMP%] {\n  text-align: center;\n  margin-top: 10px;\n  color: #687184;\n  font-size: 13px;\n}\n.signup-text[_ngcontent-%COMP%]   a[_ngcontent-%COMP%] {\n  color: #d49b00;\n  font-weight: 600;\n  text-decoration: none;\n  margin-left: 4px;\n}\n.signup-text[_ngcontent-%COMP%]   a[_ngcontent-%COMP%]:hover {\n  text-decoration: underline;\n}\n.divider[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 14px;\n  margin: 18px 0 14px;\n  color: #a0aec0;\n  font-size: 11.5px;\n  font-weight: 600;\n}\n.divider[_ngcontent-%COMP%]   span[_ngcontent-%COMP%] {\n  height: 1px;\n  background: #edf2f7;\n  flex: 1;\n}\n.footer[_ngcontent-%COMP%] {\n  text-align: center;\n  color: #8fa0b5;\n  font-size: 11.5px;\n  font-weight: 500;\n}\n.footer[_ngcontent-%COMP%]   b[_ngcontent-%COMP%] {\n  color: #ffca28;\n  margin: 0 5px;\n}\n@media (max-width: 1050px) {\n  .page[_ngcontent-%COMP%] {\n    flex-direction: column;\n    min-height: 100vh;\n  }\n  .left[_ngcontent-%COMP%] {\n    width: 100%;\n    min-height: 480px;\n    height: 480px;\n    padding: 36px 5%;\n  }\n  .right[_ngcontent-%COMP%] {\n    width: 100%;\n    min-height: auto;\n    padding: 40px 24px 60px;\n  }\n  .right-container[_ngcontent-%COMP%] {\n    max-width: 440px;\n  }\n}\n@media (max-width: 600px) {\n  .left[_ngcontent-%COMP%] {\n    min-height: 420px;\n    height: 420px;\n    padding: 28px 20px;\n  }\n  .brand[_ngcontent-%COMP%] {\n    gap: 12px;\n  }\n  .logo[_ngcontent-%COMP%] {\n    width: 50px;\n    height: 50px;\n  }\n  .brand-content[_ngcontent-%COMP%]   h1[_ngcontent-%COMP%] {\n    font-size: 22px;\n  }\n  .brand-content[_ngcontent-%COMP%]   p[_ngcontent-%COMP%] {\n    font-size: 11px;\n  }\n  .message[_ngcontent-%COMP%] {\n    margin-top: 24px;\n  }\n  .message[_ngcontent-%COMP%]   h2[_ngcontent-%COMP%] {\n    font-size: 26px;\n  }\n  .card[_ngcontent-%COMP%] {\n    padding: 26px 20px;\n    border-radius: 16px;\n  }\n  .card[_ngcontent-%COMP%]   h2[_ngcontent-%COMP%] {\n    font-size: 24px;\n  }\n  .right[_ngcontent-%COMP%] {\n    padding: 24px 16px 40px;\n  }\n}\n.login-error-banner[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n  background: #fef2f2;\n  border: 1.5px solid #fca5a5;\n  color: #dc2626;\n  padding: 10px 14px;\n  border-radius: 8px;\n  margin-bottom: 16px;\n  font-size: 13.5px;\n  font-weight: 500;\n  animation: _ngcontent-%COMP%_bannerFadeIn 0.25s ease-out;\n}\n.login-error-banner[_ngcontent-%COMP%]   svg[_ngcontent-%COMP%] {\n  flex-shrink: 0;\n  stroke: #dc2626;\n}\n@keyframes _ngcontent-%COMP%_bannerFadeIn {\n  from {\n    opacity: 0;\n    transform: translateY(-4px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n.tamil-quote[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  gap: 5px;\n  margin-top: 20px;\n  padding: -10px 10px;\n  width: 100%;\n  box-sizing: border-box;\n  background:\n    linear-gradient(\n      135deg,\n      #fff4bd 0%,\n      #ffffff 50%,\n      #ffdf55 100%);\n  border-radius: 12px;\n  border: 1px solid #ffe38a;\n}\n.tamil-quote[_ngcontent-%COMP%]   p[_ngcontent-%COMP%] {\n  font-size: 16px;\n  font-weight: 700;\n  line-height: 1.5;\n  text-align: center;\n  color: #111827;\n  margin: 0;\n}\n.lamp[_ngcontent-%COMP%] {\n  font-size: 8px;\n  flex-shrink: 0;\n}\n.site-header[_ngcontent-%COMP%] {\n  width: 100%;\n  min-height: 80px;\n  padding: 12px 5%;\n  box-sizing: border-box;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 20px;\n  background: #F9E662;\n  color: #172B4D;\n  position: relative;\n  z-index: 10;\n}\n.header-brand[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 16px;\n  margin-left: 0;\n}\n.header-brand[_ngcontent-%COMP%]   img[_ngcontent-%COMP%] {\n  width: 52px;\n  height: 52px;\n  object-fit: contain;\n  flex-shrink: 0;\n}\n.header-brand[_ngcontent-%COMP%]   h1[_ngcontent-%COMP%] {\n  margin: 0;\n  font-size: clamp(22px, 2.5vw, 30px);\n  font-weight: 800;\n  color: #172B4D;\n  line-height: 1.15;\n}\n.header-brand[_ngcontent-%COMP%]   h1[_ngcontent-%COMP%]   span[_ngcontent-%COMP%] {\n  color: #FFFFFF;\n}\n.header-brand[_ngcontent-%COMP%]   p[_ngcontent-%COMP%] {\n  margin: 3px 0 0;\n  font-size: 13px;\n  color: #172B4D;\n}\n.header-badge[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n  padding: 8px 18px;\n  border-radius: 50px;\n  background: #FFFFFF;\n  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);\n  flex-shrink: 0;\n}\n.header-badge[_ngcontent-%COMP%]   img[_ngcontent-%COMP%] {\n  width: 38px;\n  height: 38px;\n  object-fit: contain;\n}\n.header-badge[_ngcontent-%COMP%]   div[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  gap: 2px;\n}\n.header-badge[_ngcontent-%COMP%]   strong[_ngcontent-%COMP%] {\n  font-size: 13px;\n  color: #172B4D;\n  text-transform: capitalize;\n}\n.header-badge[_ngcontent-%COMP%]   hr[_ngcontent-%COMP%] {\n  margin: 1px 0;\n  border: none;\n  border-top: 1px solid #e2e8f0;\n}\n.page[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  min-height: 100vh;\n  margin: 0;\n  padding: 0;\n  background: #ffffff;\n  box-sizing: border-box;\n}\n.content-layout[_ngcontent-%COMP%] {\n  display: grid;\n  grid-template-columns: 52% 48%;\n  align-items: center;\n  width: 100%;\n  flex: 1;\n  min-height: calc(100vh - 80px);\n  margin: 0;\n  padding: 0;\n  box-sizing: border-box;\n}\n.content-layout[_ngcontent-%COMP%]   .left[_ngcontent-%COMP%] {\n  position: relative;\n  width: 100%;\n  min-width: 0;\n  height: 100%;\n  min-height: 540px;\n  display: flex;\n  flex-direction: column;\n  justify-content: space-between;\n  padding: 40px 6% 30px;\n  box-sizing: border-box;\n  overflow: hidden;\n  background: #ffffff;\n}\n.content-layout[_ngcontent-%COMP%]   .right[_ngcontent-%COMP%] {\n  position: relative;\n  width: 100%;\n  min-width: 0;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 24px 6%;\n  box-sizing: border-box;\n  background: #ffffff;\n}\n.right-container[_ngcontent-%COMP%] {\n  width: 100%;\n  max-width: 440px;\n  margin: 0 auto;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 16px;\n  box-sizing: border-box;\n}\n.card[_ngcontent-%COMP%] {\n  width: 100%;\n  padding: 30px;\n  border-radius: 20px;\n  background: #ffffff;\n  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);\n  border: 1px solid #f1f3f7;\n  box-sizing: border-box;\n}\n@media (max-width: 992px) {\n  .content-layout[_ngcontent-%COMP%] {\n    grid-template-columns: 1fr;\n    min-height: auto;\n  }\n  .content-layout[_ngcontent-%COMP%]   .left[_ngcontent-%COMP%] {\n    min-height: 380px;\n    height: auto;\n    padding: 30px 24px 10px;\n  }\n  .content-layout[_ngcontent-%COMP%]   .left[_ngcontent-%COMP%]   .photo-slider[_ngcontent-%COMP%] {\n    position: relative !important;\n    height: 220px !important;\n    margin-top: 16px !important;\n    bottom: auto !important;\n  }\n  .content-layout[_ngcontent-%COMP%]   .left[_ngcontent-%COMP%]   .yellow-curve[_ngcontent-%COMP%] {\n    display: none !important;\n  }\n  .content-layout[_ngcontent-%COMP%]   .right[_ngcontent-%COMP%] {\n    padding: 24px 20px 48px;\n    height: auto;\n  }\n}\n@media (max-width: 768px) {\n  .site-header[_ngcontent-%COMP%] {\n    padding: 10px 16px;\n    min-height: 68px;\n  }\n  .header-brand[_ngcontent-%COMP%] {\n    gap: 12px;\n  }\n  .header-brand[_ngcontent-%COMP%]   img[_ngcontent-%COMP%] {\n    width: 44px;\n    height: 44px;\n  }\n  .header-brand[_ngcontent-%COMP%]   h1[_ngcontent-%COMP%] {\n    font-size: 21px;\n  }\n  .header-brand[_ngcontent-%COMP%]   p[_ngcontent-%COMP%] {\n    font-size: 11.5px;\n  }\n  .header-badge[_ngcontent-%COMP%] {\n    padding: 6px 14px;\n  }\n  .header-badge[_ngcontent-%COMP%]   img[_ngcontent-%COMP%] {\n    width: 32px;\n    height: 32px;\n  }\n  .header-badge[_ngcontent-%COMP%]   strong[_ngcontent-%COMP%] {\n    font-size: 11.5px;\n  }\n  .card[_ngcontent-%COMP%] {\n    padding: 22px 18px;\n    border-radius: 16px;\n  }\n}\n@media (max-width: 520px) {\n  .site-header[_ngcontent-%COMP%] {\n    padding: 8px 14px;\n    min-height: 60px;\n  }\n  .header-badge[_ngcontent-%COMP%] {\n    display: none;\n  }\n  .header-brand[_ngcontent-%COMP%]   h1[_ngcontent-%COMP%] {\n    font-size: 19px;\n  }\n  .content-layout[_ngcontent-%COMP%]   .left[_ngcontent-%COMP%] {\n    min-height: auto;\n    padding: 20px 16px 0;\n  }\n  .content-layout[_ngcontent-%COMP%]   .left[_ngcontent-%COMP%]   .message[_ngcontent-%COMP%]   h2[_ngcontent-%COMP%] {\n    font-size: 24px;\n  }\n  .content-layout[_ngcontent-%COMP%]   .left[_ngcontent-%COMP%]   .photo-slider[_ngcontent-%COMP%] {\n    height: 180px !important;\n  }\n  .content-layout[_ngcontent-%COMP%]   .right[_ngcontent-%COMP%] {\n    padding: 16px 14px 36px;\n  }\n  .card[_ngcontent-%COMP%] {\n    padding: 18px 14px;\n    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);\n  }\n  .tamil-quote[_ngcontent-%COMP%]   p[_ngcontent-%COMP%] {\n    font-size: 13px;\n  }\n}\n.modal-overlay[_ngcontent-%COMP%] {\n  position: fixed;\n  inset: 0;\n  z-index: 9999;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  background: rgba(0, 0, 0, 0.6);\n  padding: 20px;\n}\n.signup-popup[_ngcontent-%COMP%] {\n  position: relative;\n  width: 100%;\n  max-width: 400px;\n  padding: 30px;\n  background: white;\n  border-radius: 18px;\n  box-sizing: border-box;\n}\n.signup-popup[_ngcontent-%COMP%]   label[_ngcontent-%COMP%] {\n  display: block;\n  margin: 12px 0 5px;\n}\n.signup-popup[_ngcontent-%COMP%]   input[_ngcontent-%COMP%] {\n  width: 100%;\n  height: 42px;\n  padding: 10px;\n  border: 1px solid #ddd;\n  border-radius: 8px;\n  box-sizing: border-box;\n}\n.close-btn[_ngcontent-%COMP%] {\n  position: absolute;\n  top: 8px;\n  right: 12px;\n  border: none;\n  background: none;\n  font-size: 26px;\n  cursor: pointer;\n}\n.signup-submit[_ngcontent-%COMP%] {\n  width: 100%;\n  margin-top: 20px;\n  padding: 12px;\n  border: none;\n  border-radius: 8px;\n  background: #ffd33d;\n  cursor: pointer;\n}\n.modal-overlay[_ngcontent-%COMP%] {\n  position: fixed;\n  inset: 0;\n  z-index: 9999;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  background: rgba(0, 0, 0, 0.60);\n  padding: 20px;\n  box-sizing: border-box;\n}\n.signup-popup[_ngcontent-%COMP%] {\n  position: relative;\n  width: 100%;\n  max-width: 440px;\n  max-height: 90vh;\n  overflow-y: auto;\n  padding: 30px;\n  background: #ffffff;\n  border-radius: 20px;\n  box-sizing: border-box;\n  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.20);\n}\n.signup-popup[_ngcontent-%COMP%]   h2[_ngcontent-%COMP%] {\n  margin: 0 0 20px;\n  color: #14213d;\n  font-size: 24px;\n  font-weight: 700;\n  text-align: left;\n}\n.signup-popup[_ngcontent-%COMP%]   label[_ngcontent-%COMP%] {\n  display: block;\n  margin: 13px 0 6px;\n  color: #14213d;\n  font-size: 14px;\n  font-weight: 500;\n}\n.signup-popup[_ngcontent-%COMP%]   input[_ngcontent-%COMP%] {\n  display: block;\n  width: 100%;\n  height: 43px;\n  padding: 10px;\n  border: 1px solid #d8dce5;\n  border-radius: 9px;\n  outline: none;\n  background: #ffffff;\n  color: #172033;\n  font-size: 14px;\n  box-sizing: border-box;\n  transition: border-color 0.2s, box-shadow 0.2s;\n}\n.signup-popup[_ngcontent-%COMP%]   input[_ngcontent-%COMP%]:focus {\n  border-color: #ffc928;\n  box-shadow: 0 0 0 3px rgba(255, 201, 40, 0.18);\n}\n.password-field[_ngcontent-%COMP%] {\n  position: relative;\n  width: 100%;\n}\n.password-field[_ngcontent-%COMP%]   input[_ngcontent-%COMP%] {\n  padding-right: 45px;\n}\n.password-eye[_ngcontent-%COMP%] {\n  position: absolute;\n  top: 50%;\n  right: 10px;\n  transform: translateY(-50%);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 4px;\n  border: none;\n  background: transparent;\n  color: #30384a;\n  cursor: pointer;\n}\n.close-btn[_ngcontent-%COMP%] {\n  position: absolute;\n  top: 12px;\n  right: 15px;\n  width: 30px;\n  height: 30px;\n  border: none;\n  border-radius: 50%;\n  background: transparent;\n  color: #111827;\n  font-size: 25px;\n  line-height: 1;\n  cursor: pointer;\n}\n.close-btn[_ngcontent-%COMP%]:hover {\n  background: #f1f2f5;\n}\n.signup-submit[_ngcontent-%COMP%] {\n  width: 100%;\n  min-height: 44px;\n  margin-top: 22px;\n  padding: 12px;\n  border: none;\n  border-radius: 9px;\n  background: #ffd33d;\n  color: #171717;\n  font-size: 15px;\n  font-weight: 600;\n  cursor: pointer;\n  transition: background 0.2s, transform 0.2s;\n}\n.signup-submit[_ngcontent-%COMP%]:hover {\n  background: #f5c21b;\n}\n.signup-submit[_ngcontent-%COMP%]:active {\n  transform: scale(0.98);\n}\n@media (max-width: 480px) {\n  .modal-overlay[_ngcontent-%COMP%] {\n    padding: 12px;\n  }\n  .signup-popup[_ngcontent-%COMP%] {\n    max-width: 100%;\n    max-height: 92vh;\n    padding: 25px 20px;\n    border-radius: 16px;\n  }\n  .signup-popup[_ngcontent-%COMP%]   h2[_ngcontent-%COMP%] {\n    font-size: 22px;\n  }\n}\n.forgot-description[_ngcontent-%COMP%] {\n  margin-bottom: 18px;\n  color: #666;\n  font-size: 14px;\n  line-height: 1.6;\n}\n.back-login[_ngcontent-%COMP%] {\n  width: 100%;\n  margin-top: 12px;\n  padding: 10px;\n  border: none;\n  background: transparent;\n  cursor: pointer;\n  color: #333;\n}\n.otp-section[_ngcontent-%COMP%] {\n  margin-top: 20px;\n  width: 100%;\n}\n.otp-section[_ngcontent-%COMP%]   p[_ngcontent-%COMP%] {\n  font-size: 14px;\n  margin-bottom: 16px;\n}\n.otp-boxes[_ngcontent-%COMP%] {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  gap: 6px;\n  width: 100%;\n  margin-bottom: 20px;\n}\n.otp-input[_ngcontent-%COMP%] {\n  flex: 1;\n  min-width: 0;\n  max-width: 48px;\n  height: 48px;\n  text-align: center;\n  font-size: 20px;\n  font-weight: 600;\n  border: 1px solid #d5d9e2;\n  border-radius: 10px;\n  outline: none;\n  box-sizing: border-box;\n}\n.otp-input[_ngcontent-%COMP%]:focus {\n  border-color: #ffcc32;\n  box-shadow: 0 0 0 2px #ffcc3240;\n}\n@media (min-width: 993px) {\n  .left[_ngcontent-%COMP%]   .photo-slider[_ngcontent-%COMP%] {\n    position: absolute !important;\n    left: 0 !important;\n    bottom: 0 !important;\n    width: 100% !important;\n    height: 60% !important;\n    overflow: hidden !important;\n    z-index: 2 !important;\n  }\n  .left[_ngcontent-%COMP%]   .photo-slider[_ngcontent-%COMP%]   img[_ngcontent-%COMP%] {\n    width: 100% !important;\n    height: 100% !important;\n    object-fit: cover !important;\n    object-position: center bottom !important;\n  }\n  .left[_ngcontent-%COMP%]   .yellow-curve[_ngcontent-%COMP%] {\n    position: absolute !important;\n    left: -5% !important;\n    bottom: -45px !important;\n    width: 110% !important;\n    height: 170px !important;\n    z-index: 3 !important;\n  }\n}\n@media (max-width: 992px) {\n  .left[_ngcontent-%COMP%]   .photo-slider[_ngcontent-%COMP%] {\n    position: relative !important;\n    width: 100% !important;\n    max-width: 440px !important;\n    height: 220px !important;\n    margin: 16px auto 0 !important;\n    overflow: hidden !important;\n    border-radius: 14px;\n    z-index: 2 !important;\n  }\n  .left[_ngcontent-%COMP%]   .photo-slider[_ngcontent-%COMP%]   img[_ngcontent-%COMP%] {\n    width: 100% !important;\n    height: 100% !important;\n    object-fit: contain !important;\n    object-position: center !important;\n  }\n  .left[_ngcontent-%COMP%]   .yellow-curve[_ngcontent-%COMP%] {\n    display: none !important;\n  }\n}\n/*# sourceMappingURL=login.component.css.map */'] });
+  }, dependencies: [FormsModule, \u0275NgNoValidate, DefaultValueAccessor, CheckboxControlValueAccessor, NgControlStatus, NgControlStatusGroup, RequiredValidator, MaxLengthValidator, NgModel, NgForm, CommonModule, NgForOf, NgIf], styles: ['\n*[_ngcontent-%COMP%] {\n  box-sizing: border-box;\n  margin: 0;\n  padding: 0;\n}\n[_nghost-%COMP%] {\n  display: block;\n  width: 100%;\n  min-height: 100vh;\n}\n.page[_ngcontent-%COMP%] {\n  width: 100%;\n  min-height: 100vh;\n  display: flex;\n  font-family:\n    -apple-system,\n    BlinkMacSystemFont,\n    "Segoe UI",\n    Roboto,\n    Helvetica,\n    Arial,\n    sans-serif;\n  background: #ffffff;\n  color: #172033;\n}\n.left[_ngcontent-%COMP%] {\n  width: 52%;\n  min-height: 100vh;\n  position: relative;\n  padding: 44px 6.5%;\n  display: flex;\n  flex-direction: column;\n  background: #ffffff;\n  overflow: hidden;\n}\n.dots[_ngcontent-%COMP%] {\n  position: absolute;\n  top: 36px;\n  right: 40px;\n  display: grid;\n  grid-template-columns: repeat(3, 6px);\n  gap: 8px;\n  opacity: 0.35;\n  z-index: 5;\n  pointer-events: none;\n}\n.dots[_ngcontent-%COMP%]   i[_ngcontent-%COMP%] {\n  display: block;\n  width: 6px;\n  height: 6px;\n  border-radius: 50%;\n  background: #f3b000;\n}\n.brand[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 16px;\n  z-index: 10;\n  position: relative;\n}\n.logo[_ngcontent-%COMP%] {\n  width: 60px;\n  height: 60px;\n  flex-shrink: 0;\n  cursor: pointer;\n  border-radius: 50%;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  transition: transform 0.2s ease;\n}\n.logo[_ngcontent-%COMP%]:hover {\n  transform: scale(1.05);\n}\n.logo[_ngcontent-%COMP%]   img[_ngcontent-%COMP%] {\n  width: 100%;\n  height: 100%;\n  object-fit: contain;\n  display: block;\n}\n.brand-content[_ngcontent-%COMP%] {\n  flex: 1;\n  min-width: 0;\n}\n.brand-content[_ngcontent-%COMP%]   h1[_ngcontent-%COMP%] {\n  font-size: clamp(24px, 2.4vw, 32px);\n  font-weight: 750;\n  color: #14213d;\n  letter-spacing: -0.5px;\n  line-height: 1.2;\n}\n.brand-content[_ngcontent-%COMP%]   h1[_ngcontent-%COMP%]   span[_ngcontent-%COMP%] {\n  color: #f3b000;\n}\n.brand-content[_ngcontent-%COMP%]   p[_ngcontent-%COMP%] {\n  margin-top: 5px;\n  color: #687184;\n  font-size: 13px;\n  line-height: 1.4;\n  font-weight: 500;\n}\n.message[_ngcontent-%COMP%] {\n  position: relative;\n  width: 100%;\n  box-sizing: border-box;\n  padding: 12px 32px 16px 48px;\n  margin: 0;\n  text-align: left;\n  z-index: 2;\n}\n.message[_ngcontent-%COMP%]   h2[_ngcontent-%COMP%] {\n  margin: 0 0 10px;\n  padding: 0;\n  font-size: 36px;\n  font-weight: 800;\n  line-height: 1.2;\n  letter-spacing: -0.5px;\n  color: #172B4D;\n}\n.message[_ngcontent-%COMP%]   h2[_ngcontent-%COMP%]   span[_ngcontent-%COMP%] {\n  color: #F5A900;\n}\n.impact-tags[_ngcontent-%COMP%] {\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  justify-content: flex-start;\n  gap: 10px 18px;\n  margin: 0;\n  padding: 0;\n}\n.impact-tag[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  margin: 0;\n  padding: 0;\n  font-size: 13px;\n  line-height: 1.5;\n  white-space: nowrap;\n  color: #263858;\n}\n.impact-tag[_ngcontent-%COMP%]   b[_ngcontent-%COMP%] {\n  color: #F5A900;\n  font-weight: 800;\n}\n.photo-slider[_ngcontent-%COMP%] {\n  position: absolute;\n  left: 0;\n  bottom: 0;\n  width: 100%;\n  height: 56%;\n  overflow: hidden;\n  z-index: 2;\n}\n.slides-track[_ngcontent-%COMP%] {\n  display: flex;\n  width: 100%;\n  height: 100%;\n  transition: transform 0.85s cubic-bezier(0.25, 1, 0.5, 1);\n  will-change: transform;\n}\n.slide[_ngcontent-%COMP%] {\n  flex: 0 0 100%;\n  width: 100%;\n  height: 100%;\n  position: relative;\n  overflow: hidden;\n}\n.slide[_ngcontent-%COMP%]   img[_ngcontent-%COMP%] {\n  width: 100%;\n  height: 100%;\n  object-fit: cover;\n  object-position: center 35%;\n  display: block;\n}\n.wave[_ngcontent-%COMP%] {\n  position: absolute;\n  left: -5%;\n  bottom: -92%;\n  width: 110%;\n  height: 115%;\n  background: #ffd33d;\n  border-radius: 50%;\n  z-index: 5;\n  pointer-events: none;\n}\n.slider-dots[_ngcontent-%COMP%] {\n  position: absolute;\n  z-index: 10;\n  bottom: 16px;\n  left: 50%;\n  transform: translateX(-50%);\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}\n.slider-dots[_ngcontent-%COMP%]   button[_ngcontent-%COMP%] {\n  width: 8px;\n  height: 8px;\n  padding: 0;\n  border: none;\n  border-radius: 50%;\n  background: rgba(255, 255, 255, 0.85);\n  cursor: pointer;\n  transition: all 0.25s ease;\n}\n.slider-dots[_ngcontent-%COMP%]   button.active[_ngcontent-%COMP%] {\n  width: 22px;\n  border-radius: 10px;\n  background: #14213d;\n}\n.right[_ngcontent-%COMP%] {\n  width: 48%;\n  min-height: 100vh;\n  padding: 40px 32px;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  overflow-y: auto;\n  background:\n    radial-gradient(\n      circle at top left,\n      #fff8dc 0%,\n      transparent 55%),\n    #ffffff;\n}\n.right-container[_ngcontent-%COMP%] {\n  width: 100%;\n  max-width: 440px;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  margin: auto 0;\n}\n.logo-container[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n  margin-bottom: 20px;\n  padding: 8px 14px;\n  background: #ffffff;\n  border: 1px solid #f2e9cb;\n  border-radius: 40px;\n  box-shadow: 0 4px 16px rgba(20, 33, 61, 0.05);\n}\n.company-logo[_ngcontent-%COMP%] {\n  width: 60px;\n  height: 60px;\n  object-fit: contain;\n  border-radius: 50%;\n  display: block;\n}\n.logo-text[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  text-align: left;\n}\n.logo-sub[_ngcontent-%COMP%] {\n  font-size: 11.5px;\n  font-weight: 600;\n  color: #7b8494;\n  line-height: 1.25;\n}\n.logo-main[_ngcontent-%COMP%] {\n  font-size: 14.5px;\n  font-weight: 750;\n  color: #14213d;\n  line-height: 1.25;\n}\n.card[_ngcontent-%COMP%] {\n  width: 100%;\n  background: #ffffff;\n  border: 1.5px solid #f2ece0;\n  border-radius: 20px;\n  padding: 34px 34px 28px;\n  box-shadow: 0 16px 45px rgba(20, 33, 61, 0.07), 0 2px 8px rgba(20, 33, 61, 0.03);\n}\n.welcome[_ngcontent-%COMP%] {\n  color: #d49b00;\n  font-size: 11px;\n  font-weight: 750;\n  letter-spacing: 1px;\n  text-transform: uppercase;\n  margin-bottom: 4px;\n}\n.card[_ngcontent-%COMP%]   h2[_ngcontent-%COMP%] {\n  font-size: 28px;\n  font-weight: 800;\n  color: #14213d;\n  margin-bottom: 6px;\n  letter-spacing: -0.4px;\n}\n.desc[_ngcontent-%COMP%] {\n  color: #687184;\n  font-size: 13.5px;\n  line-height: 1.5;\n  margin-bottom: 22px;\n}\n.input-box[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  margin-bottom: 16px;\n}\n.input-box[_ngcontent-%COMP%]   label[_ngcontent-%COMP%] {\n  display: block;\n  margin-bottom: 6px;\n  font-size: 13px;\n  font-weight: 600;\n  color: #2d3748;\n}\n.input-box[_ngcontent-%COMP%]   input[_ngcontent-%COMP%] {\n  width: 100%;\n  height: 46px;\n  box-sizing: border-box;\n  padding: 0 14px;\n  border: 1.5px solid #e2e8f0;\n  border-radius: 10px;\n  font-size: 14.5px;\n  color: #1a202c;\n  background: #ffffff;\n  outline: none;\n  transition: border-color 0.2s ease, box-shadow 0.2s ease;\n}\n.input-box[_ngcontent-%COMP%]   input[_ngcontent-%COMP%]::placeholder {\n  color: #a0aec0;\n}\n.input-box[_ngcontent-%COMP%]   input[_ngcontent-%COMP%]:focus {\n  border-color: #f0b600;\n  box-shadow: 0 0 0 3px rgba(240, 182, 0, 0.16);\n}\n.password-wrapper[_ngcontent-%COMP%] {\n  position: relative;\n  display: flex;\n  align-items: center;\n  width: 100%;\n}\n.password-wrapper[_ngcontent-%COMP%]   input[_ngcontent-%COMP%] {\n  padding-right: 44px;\n}\n.password-wrapper[_ngcontent-%COMP%]   .eye[_ngcontent-%COMP%] {\n  position: absolute;\n  right: 12px;\n  top: 50%;\n  transform: translateY(-50%);\n  border: none;\n  background: transparent;\n  cursor: pointer;\n  color: #718096;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 4px;\n  border-radius: 4px;\n  outline: none;\n  transition: color 0.15s ease;\n}\n.password-wrapper[_ngcontent-%COMP%]   .eye[_ngcontent-%COMP%]:hover {\n  color: #14213d;\n}\n.password-wrapper[_ngcontent-%COMP%]   .eye[_ngcontent-%COMP%]:focus-visible {\n  outline: 2px solid #f4b400;\n}\n.remember-row[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  margin: 4px 0 20px;\n}\n.remember-label[_ngcontent-%COMP%] {\n  display: inline-flex;\n  align-items: center;\n  gap: 8px;\n  font-size: 13px;\n  color: #4a5568;\n  cursor: pointer;\n  -webkit-user-select: none;\n  user-select: none;\n}\n.remember-label[_ngcontent-%COMP%]   input[type=checkbox][_ngcontent-%COMP%] {\n  width: 15px;\n  height: 15px;\n  accent-color: #f5b400;\n  cursor: pointer;\n  margin: 0;\n}\n.forgot-link[_ngcontent-%COMP%] {\n  color: #d49b00;\n  font-size: 13px;\n  font-weight: 600;\n  text-decoration: none;\n  transition: color 0.15s ease;\n}\n.forgot-link[_ngcontent-%COMP%]:hover {\n  color: #b58400;\n  text-decoration: underline;\n}\n.login[_ngcontent-%COMP%] {\n  width: 100%;\n  height: 48px;\n  border: none;\n  border-radius: 10px;\n  background:\n    linear-gradient(\n      90deg,\n      #F9E662,\n      #ffd83e);\n  font-size: 15px;\n  font-weight: 700;\n  color: #172033;\n  cursor: pointer;\n  box-shadow: 0 8px 20px rgba(238, 180, 0, 0.24);\n  transition:\n    transform 0.15s ease,\n    box-shadow 0.15s ease,\n    background 0.2s ease;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  gap: 8px;\n}\n.login[_ngcontent-%COMP%]:hover {\n  transform: translateY(-2px);\n  box-shadow: 0 12px 24px rgba(238, 180, 0, 0.32);\n  background:\n    linear-gradient(\n      90deg,\n      #f5bc00,\n      #ffcf29);\n}\n.login[_ngcontent-%COMP%]:active {\n  transform: translateY(0);\n}\n.signup-text[_ngcontent-%COMP%] {\n  text-align: center;\n  margin-top: 10px;\n  color: #687184;\n  font-size: 13px;\n}\n.signup-text[_ngcontent-%COMP%]   a[_ngcontent-%COMP%] {\n  color: #d49b00;\n  font-weight: 600;\n  text-decoration: none;\n  margin-left: 4px;\n}\n.signup-text[_ngcontent-%COMP%]   a[_ngcontent-%COMP%]:hover {\n  text-decoration: underline;\n}\n.divider[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 14px;\n  margin: 18px 0 14px;\n  color: #a0aec0;\n  font-size: 11.5px;\n  font-weight: 600;\n}\n.divider[_ngcontent-%COMP%]   span[_ngcontent-%COMP%] {\n  height: 1px;\n  background: #edf2f7;\n  flex: 1;\n}\n.footer[_ngcontent-%COMP%] {\n  text-align: center;\n  color: #8fa0b5;\n  font-size: 11.5px;\n  font-weight: 500;\n}\n.footer[_ngcontent-%COMP%]   b[_ngcontent-%COMP%] {\n  color: #ffca28;\n  margin: 0 5px;\n}\n@media (max-width: 1050px) {\n  .page[_ngcontent-%COMP%] {\n    flex-direction: column;\n    min-height: 100vh;\n  }\n  .left[_ngcontent-%COMP%] {\n    width: 100%;\n    min-height: 480px;\n    height: 480px;\n    padding: 36px 5%;\n  }\n  .right[_ngcontent-%COMP%] {\n    width: 100%;\n    min-height: auto;\n    padding: 40px 24px 60px;\n  }\n  .right-container[_ngcontent-%COMP%] {\n    max-width: 440px;\n  }\n}\n@media (max-width: 600px) {\n  .left[_ngcontent-%COMP%] {\n    min-height: 420px;\n    height: 420px;\n    padding: 28px 20px;\n  }\n  .brand[_ngcontent-%COMP%] {\n    gap: 12px;\n  }\n  .logo[_ngcontent-%COMP%] {\n    width: 50px;\n    height: 50px;\n  }\n  .brand-content[_ngcontent-%COMP%]   h1[_ngcontent-%COMP%] {\n    font-size: 22px;\n  }\n  .brand-content[_ngcontent-%COMP%]   p[_ngcontent-%COMP%] {\n    font-size: 11px;\n  }\n  .message[_ngcontent-%COMP%] {\n    margin-top: 24px;\n  }\n  .message[_ngcontent-%COMP%]   h2[_ngcontent-%COMP%] {\n    font-size: 26px;\n  }\n  .card[_ngcontent-%COMP%] {\n    padding: 26px 20px;\n    border-radius: 16px;\n  }\n  .card[_ngcontent-%COMP%]   h2[_ngcontent-%COMP%] {\n    font-size: 24px;\n  }\n  .right[_ngcontent-%COMP%] {\n    padding: 24px 16px 40px;\n  }\n}\n.login-error-banner[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n  background: #fef2f2;\n  border: 1.5px solid #fca5a5;\n  color: #dc2626;\n  padding: 10px 14px;\n  border-radius: 8px;\n  margin-bottom: 16px;\n  font-size: 13.5px;\n  font-weight: 500;\n  animation: _ngcontent-%COMP%_bannerFadeIn 0.25s ease-out;\n}\n.login-error-banner[_ngcontent-%COMP%]   svg[_ngcontent-%COMP%] {\n  flex-shrink: 0;\n  stroke: #dc2626;\n}\n.login-success-banner[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n  background: #f0fdf4;\n  border: 1.5px solid #86efac;\n  color: #15803d;\n  padding: 10px 14px;\n  border-radius: 8px;\n  margin-bottom: 16px;\n  font-size: 13.5px;\n  font-weight: 500;\n  animation: _ngcontent-%COMP%_bannerFadeIn 0.25s ease-out;\n}\n.login-success-banner[_ngcontent-%COMP%]   svg[_ngcontent-%COMP%] {\n  flex-shrink: 0;\n  stroke: #16a34a;\n}\n@keyframes _ngcontent-%COMP%_bannerFadeIn {\n  from {\n    opacity: 0;\n    transform: translateY(-4px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n.tamil-quote[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  gap: 5px;\n  margin-top: 20px;\n  padding: -10px 10px;\n  width: 100%;\n  box-sizing: border-box;\n  background:\n    linear-gradient(\n      135deg,\n      #fff4bd 0%,\n      #ffffff 50%,\n      #ffdf55 100%);\n  border-radius: 12px;\n  border: 1px solid #ffe38a;\n}\n.tamil-quote[_ngcontent-%COMP%]   p[_ngcontent-%COMP%] {\n  font-size: 16px;\n  font-weight: 700;\n  line-height: 1.5;\n  text-align: center;\n  color: #111827;\n  margin: 0;\n}\n.lamp[_ngcontent-%COMP%] {\n  font-size: 8px;\n  flex-shrink: 0;\n}\n.site-header[_ngcontent-%COMP%] {\n  width: 100%;\n  min-height: 80px;\n  padding: 12px 5%;\n  box-sizing: border-box;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 20px;\n  background: #F9E662;\n  color: #172B4D;\n  position: relative;\n  z-index: 10;\n}\n.header-brand[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 16px;\n  margin-left: 0;\n}\n.header-brand[_ngcontent-%COMP%]   img[_ngcontent-%COMP%] {\n  width: 52px;\n  height: 52px;\n  object-fit: contain;\n  flex-shrink: 0;\n}\n.header-brand[_ngcontent-%COMP%]   h1[_ngcontent-%COMP%] {\n  margin: 0;\n  font-size: clamp(22px, 2.5vw, 30px);\n  font-weight: 800;\n  color: #172B4D;\n  line-height: 1.15;\n}\n.header-brand[_ngcontent-%COMP%]   h1[_ngcontent-%COMP%]   span[_ngcontent-%COMP%] {\n  color: #FFFFFF;\n}\n.header-brand[_ngcontent-%COMP%]   p[_ngcontent-%COMP%] {\n  margin: 3px 0 0;\n  font-size: 13px;\n  color: #172B4D;\n}\n.header-badge[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n  padding: 8px 18px;\n  border-radius: 50px;\n  background: #FFFFFF;\n  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);\n  flex-shrink: 0;\n}\n.header-badge[_ngcontent-%COMP%]   img[_ngcontent-%COMP%] {\n  width: 58px;\n  height: 58px;\n  object-fit: contain;\n}\n.header-badge[_ngcontent-%COMP%]   div[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  gap: 2px;\n}\n.header-badge[_ngcontent-%COMP%]   strong[_ngcontent-%COMP%] {\n  font-size: 13px;\n  color: #172B4D;\n  text-transform: capitalize;\n}\n.header-badge[_ngcontent-%COMP%]   hr[_ngcontent-%COMP%] {\n  margin: 1px 0;\n  border: none;\n  border-top: 1px solid #e2e8f0;\n}\n.page[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  min-height: 100vh;\n  margin: 0;\n  padding: 0;\n  background: #ffffff;\n  box-sizing: border-box;\n}\n.content-layout[_ngcontent-%COMP%] {\n  display: grid;\n  grid-template-columns: 52% 48%;\n  align-items: center;\n  width: 100%;\n  flex: 1;\n  min-height: calc(100vh - 80px);\n  margin: 0;\n  padding: 0;\n  box-sizing: border-box;\n}\n.content-layout[_ngcontent-%COMP%]   .left[_ngcontent-%COMP%] {\n  position: relative;\n  width: 100%;\n  min-width: 0;\n  height: 100%;\n  min-height: 540px;\n  display: flex;\n  flex-direction: column;\n  justify-content: space-between;\n  padding: 40px 6% 30px;\n  box-sizing: border-box;\n  overflow: hidden;\n  background: #ffffff;\n}\n.content-layout[_ngcontent-%COMP%]   .right[_ngcontent-%COMP%] {\n  position: relative;\n  width: 100%;\n  min-width: 0;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 24px 6%;\n  box-sizing: border-box;\n  background: #ffffff;\n}\n.right-container[_ngcontent-%COMP%] {\n  width: 100%;\n  max-width: 440px;\n  margin: 0 auto;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 16px;\n  box-sizing: border-box;\n}\n.card[_ngcontent-%COMP%] {\n  width: 100%;\n  padding: 30px;\n  border-radius: 20px;\n  background: #ffffff;\n  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);\n  border: 1px solid #f1f3f7;\n  box-sizing: border-box;\n}\n@media (max-width: 992px) {\n  .content-layout[_ngcontent-%COMP%] {\n    grid-template-columns: 1fr;\n    min-height: auto;\n  }\n  .content-layout[_ngcontent-%COMP%]   .left[_ngcontent-%COMP%] {\n    min-height: 380px;\n    height: auto;\n    padding: 30px 24px 10px;\n  }\n  .content-layout[_ngcontent-%COMP%]   .left[_ngcontent-%COMP%]   .photo-slider[_ngcontent-%COMP%] {\n    position: relative !important;\n    height: 220px !important;\n    margin-top: 16px !important;\n    bottom: auto !important;\n  }\n  .content-layout[_ngcontent-%COMP%]   .left[_ngcontent-%COMP%]   .yellow-curve[_ngcontent-%COMP%] {\n    display: none !important;\n  }\n  .content-layout[_ngcontent-%COMP%]   .right[_ngcontent-%COMP%] {\n    padding: 24px 20px 48px;\n    height: auto;\n  }\n}\n@media (max-width: 768px) {\n  .site-header[_ngcontent-%COMP%] {\n    padding: 10px 16px;\n    min-height: 68px;\n  }\n  .header-brand[_ngcontent-%COMP%] {\n    gap: 12px;\n  }\n  .header-brand[_ngcontent-%COMP%]   img[_ngcontent-%COMP%] {\n    width: 44px;\n    height: 44px;\n  }\n  .header-brand[_ngcontent-%COMP%]   h1[_ngcontent-%COMP%] {\n    font-size: 21px;\n  }\n  .header-brand[_ngcontent-%COMP%]   p[_ngcontent-%COMP%] {\n    font-size: 11.5px;\n  }\n  .header-badge[_ngcontent-%COMP%] {\n    padding: 6px 14px;\n  }\n  .header-badge[_ngcontent-%COMP%]   img[_ngcontent-%COMP%] {\n    width: 32px;\n    height: 32px;\n  }\n  .header-badge[_ngcontent-%COMP%]   strong[_ngcontent-%COMP%] {\n    font-size: 11.5px;\n  }\n  .card[_ngcontent-%COMP%] {\n    padding: 22px 18px;\n    border-radius: 16px;\n  }\n}\n@media (max-width: 520px) {\n  .site-header[_ngcontent-%COMP%] {\n    padding: 8px 14px;\n    min-height: 60px;\n  }\n  .header-badge[_ngcontent-%COMP%] {\n    display: none;\n  }\n  .header-brand[_ngcontent-%COMP%]   h1[_ngcontent-%COMP%] {\n    font-size: 19px;\n  }\n  .content-layout[_ngcontent-%COMP%]   .left[_ngcontent-%COMP%] {\n    min-height: auto;\n    padding: 20px 16px 0;\n  }\n  .content-layout[_ngcontent-%COMP%]   .left[_ngcontent-%COMP%]   .message[_ngcontent-%COMP%]   h2[_ngcontent-%COMP%] {\n    font-size: 24px;\n  }\n  .content-layout[_ngcontent-%COMP%]   .left[_ngcontent-%COMP%]   .photo-slider[_ngcontent-%COMP%] {\n    height: 180px !important;\n  }\n  .content-layout[_ngcontent-%COMP%]   .right[_ngcontent-%COMP%] {\n    padding: 16px 14px 36px;\n  }\n  .card[_ngcontent-%COMP%] {\n    padding: 18px 14px;\n    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);\n  }\n  .tamil-quote[_ngcontent-%COMP%]   p[_ngcontent-%COMP%] {\n    font-size: 13px;\n  }\n}\n.modal-overlay[_ngcontent-%COMP%] {\n  position: fixed;\n  inset: 0;\n  z-index: 9999;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  background: rgba(0, 0, 0, 0.6);\n  padding: 20px;\n}\n.signup-popup[_ngcontent-%COMP%] {\n  position: relative;\n  width: 100%;\n  max-width: 400px;\n  padding: 30px;\n  background: white;\n  border-radius: 18px;\n  box-sizing: border-box;\n}\n.signup-popup[_ngcontent-%COMP%]   label[_ngcontent-%COMP%] {\n  display: block;\n  margin: 12px 0 5px;\n}\n.signup-popup[_ngcontent-%COMP%]   input[_ngcontent-%COMP%] {\n  width: 100%;\n  height: 42px;\n  padding: 10px;\n  border: 1px solid #ddd;\n  border-radius: 8px;\n  box-sizing: border-box;\n}\n.close-btn[_ngcontent-%COMP%] {\n  position: absolute;\n  top: 8px;\n  right: 12px;\n  border: none;\n  background: none;\n  font-size: 26px;\n  cursor: pointer;\n}\n.signup-submit[_ngcontent-%COMP%] {\n  width: 100%;\n  margin-top: 20px;\n  padding: 12px;\n  border: none;\n  border-radius: 8px;\n  background: #ffd33d;\n  cursor: pointer;\n}\n.modal-overlay[_ngcontent-%COMP%] {\n  position: fixed;\n  inset: 0;\n  z-index: 9999;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  background: rgba(0, 0, 0, 0.60);\n  padding: 20px;\n  box-sizing: border-box;\n}\n.signup-popup[_ngcontent-%COMP%] {\n  position: relative;\n  width: 100%;\n  max-width: 440px;\n  max-height: 90vh;\n  overflow-y: auto;\n  padding: 30px;\n  background: #ffffff;\n  border-radius: 20px;\n  box-sizing: border-box;\n  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.20);\n}\n.signup-popup[_ngcontent-%COMP%]   h2[_ngcontent-%COMP%] {\n  margin: 0 0 20px;\n  color: #14213d;\n  font-size: 24px;\n  font-weight: 700;\n  text-align: left;\n}\n.signup-popup[_ngcontent-%COMP%]   label[_ngcontent-%COMP%] {\n  display: block;\n  margin: 13px 0 6px;\n  color: #14213d;\n  font-size: 14px;\n  font-weight: 500;\n}\n.signup-popup[_ngcontent-%COMP%]   input[_ngcontent-%COMP%] {\n  display: block;\n  width: 100%;\n  height: 43px;\n  padding: 10px;\n  border: 1px solid #d8dce5;\n  border-radius: 9px;\n  outline: none;\n  background: #ffffff;\n  color: #172033;\n  font-size: 14px;\n  box-sizing: border-box;\n  transition: border-color 0.2s, box-shadow 0.2s;\n}\n.signup-popup[_ngcontent-%COMP%]   input[_ngcontent-%COMP%]:focus {\n  border-color: #ffc928;\n  box-shadow: 0 0 0 3px rgba(255, 201, 40, 0.18);\n}\n.password-field[_ngcontent-%COMP%] {\n  position: relative;\n  width: 100%;\n}\n.password-field[_ngcontent-%COMP%]   input[_ngcontent-%COMP%] {\n  padding-right: 45px;\n}\n.password-eye[_ngcontent-%COMP%] {\n  position: absolute;\n  top: 50%;\n  right: 10px;\n  transform: translateY(-50%);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 4px;\n  border: none;\n  background: transparent;\n  color: #30384a;\n  cursor: pointer;\n}\n.close-btn[_ngcontent-%COMP%] {\n  position: absolute;\n  top: 12px;\n  right: 15px;\n  width: 30px;\n  height: 30px;\n  border: none;\n  border-radius: 50%;\n  background: transparent;\n  color: #111827;\n  font-size: 25px;\n  line-height: 1;\n  cursor: pointer;\n}\n.close-btn[_ngcontent-%COMP%]:hover {\n  background: #f1f2f5;\n}\n.signup-submit[_ngcontent-%COMP%] {\n  width: 100%;\n  min-height: 44px;\n  margin-top: 22px;\n  padding: 12px;\n  border: none;\n  border-radius: 9px;\n  background: #ffd33d;\n  color: #171717;\n  font-size: 15px;\n  font-weight: 600;\n  cursor: pointer;\n  transition: background 0.2s, transform 0.2s;\n}\n.signup-submit[_ngcontent-%COMP%]:hover {\n  background: #f5c21b;\n}\n.signup-submit[_ngcontent-%COMP%]:active {\n  transform: scale(0.98);\n}\n@media (max-width: 480px) {\n  .modal-overlay[_ngcontent-%COMP%] {\n    padding: 12px;\n  }\n  .signup-popup[_ngcontent-%COMP%] {\n    max-width: 100%;\n    max-height: 92vh;\n    padding: 25px 20px;\n    border-radius: 16px;\n  }\n  .signup-popup[_ngcontent-%COMP%]   h2[_ngcontent-%COMP%] {\n    font-size: 22px;\n  }\n}\n.forgot-description[_ngcontent-%COMP%] {\n  margin-bottom: 18px;\n  color: #666;\n  font-size: 14px;\n  line-height: 1.6;\n}\n.back-login[_ngcontent-%COMP%] {\n  width: 100%;\n  margin-top: 12px;\n  padding: 10px;\n  border: none;\n  background: transparent;\n  cursor: pointer;\n  color: #333;\n}\n.otp-section[_ngcontent-%COMP%] {\n  margin-top: 20px;\n  width: 100%;\n}\n.otp-section[_ngcontent-%COMP%]   p[_ngcontent-%COMP%] {\n  font-size: 14px;\n  margin-bottom: 16px;\n}\n.otp-boxes[_ngcontent-%COMP%] {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  gap: 6px;\n  width: 100%;\n  margin-bottom: 20px;\n}\n.otp-input[_ngcontent-%COMP%] {\n  flex: 1;\n  min-width: 0;\n  max-width: 48px;\n  height: 48px;\n  text-align: center;\n  font-size: 20px;\n  font-weight: 600;\n  border: 1px solid #d5d9e2;\n  border-radius: 10px;\n  outline: none;\n  box-sizing: border-box;\n}\n.otp-input[_ngcontent-%COMP%]:focus {\n  border-color: #ffcc32;\n  box-shadow: 0 0 0 2px #ffcc3240;\n}\n@media (min-width: 993px) {\n  .left[_ngcontent-%COMP%]   .photo-slider[_ngcontent-%COMP%] {\n    position: absolute !important;\n    left: 0 !important;\n    bottom: 0 !important;\n    width: 100% !important;\n    height: 60% !important;\n    overflow: hidden !important;\n    z-index: 2 !important;\n  }\n  .left[_ngcontent-%COMP%]   .photo-slider[_ngcontent-%COMP%]   img[_ngcontent-%COMP%] {\n    width: 100% !important;\n    height: 100% !important;\n    object-fit: cover !important;\n    object-position: center bottom !important;\n  }\n  .left[_ngcontent-%COMP%]   .yellow-curve[_ngcontent-%COMP%] {\n    position: absolute !important;\n    left: -5% !important;\n    bottom: -45px !important;\n    width: 110% !important;\n    height: 170px !important;\n    z-index: 3 !important;\n  }\n}\n@media (max-width: 992px) {\n  .left[_ngcontent-%COMP%]   .photo-slider[_ngcontent-%COMP%] {\n    position: relative !important;\n    width: 100% !important;\n    max-width: 440px !important;\n    height: 220px !important;\n    margin: 16px auto 0 !important;\n    overflow: hidden !important;\n    border-radius: 14px;\n    z-index: 2 !important;\n  }\n  .left[_ngcontent-%COMP%]   .photo-slider[_ngcontent-%COMP%]   img[_ngcontent-%COMP%] {\n    width: 100% !important;\n    height: 100% !important;\n    object-fit: contain !important;\n    object-position: center !important;\n  }\n  .left[_ngcontent-%COMP%]   .yellow-curve[_ngcontent-%COMP%] {\n    display: none !important;\n  }\n}\n/*# sourceMappingURL=login.component.css.map */'] });
 };
 (() => {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(LoginComponent, [{
@@ -839,6 +1033,15 @@ var LoginComponent = class _LoginComponent {
         </p>
 
         <form (ngSubmit)="loginUser()">
+          <!-- Success Banner -->
+          <div class="login-success-banner" *ngIf="successMessage">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            <span>{{ successMessage }}</span>
+          </div>
+
           <!-- Error Banner -->
           <div class="login-error-banner" *ngIf="errorMessage">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -932,8 +1135,9 @@ var LoginComponent = class _LoginComponent {
           <!-- Login Button -->
           <button
             class="login"
-            type="submit">
-            Login &nbsp; \u2192
+            type="submit"
+            [disabled]="isLoggingIn">
+            {{ isLoggingIn ? 'Logging in...' : 'Login &nbsp; \u2192' }}
           </button>
 
         </form>
@@ -983,6 +1187,16 @@ var LoginComponent = class _LoginComponent {
       (click)="closeSignup()">\xD7</button>
 
     <h2>Create Account</h2>
+
+    <!-- Signup Error Banner -->
+    <div class="login-error-banner" *ngIf="signupError">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <span>{{ signupError }}</span>
+    </div>
 
     <!-- Full Name -->
     <label>Full Name</label>
@@ -1084,8 +1298,9 @@ var LoginComponent = class _LoginComponent {
     <button
       type="button"
       class="signup-submit"
+      [disabled]="isSigningUp"
       (click)="submitSignup()">
-      Create Account
+      {{ isSigningUp ? 'Creating Account...' : 'Create Account' }}
     </button>
 
   </div>
@@ -1168,11 +1383,11 @@ var LoginComponent = class _LoginComponent {
 </div>
 
 
-</div>`, styles: ['/* src/app/pages/login/login.component.css */\n* {\n  box-sizing: border-box;\n  margin: 0;\n  padding: 0;\n}\n:host {\n  display: block;\n  width: 100%;\n  min-height: 100vh;\n}\n.page {\n  width: 100%;\n  min-height: 100vh;\n  display: flex;\n  font-family:\n    -apple-system,\n    BlinkMacSystemFont,\n    "Segoe UI",\n    Roboto,\n    Helvetica,\n    Arial,\n    sans-serif;\n  background: #ffffff;\n  color: #172033;\n}\n.left {\n  width: 52%;\n  min-height: 100vh;\n  position: relative;\n  padding: 44px 6.5%;\n  display: flex;\n  flex-direction: column;\n  background: #ffffff;\n  overflow: hidden;\n}\n.dots {\n  position: absolute;\n  top: 36px;\n  right: 40px;\n  display: grid;\n  grid-template-columns: repeat(3, 6px);\n  gap: 8px;\n  opacity: 0.35;\n  z-index: 5;\n  pointer-events: none;\n}\n.dots i {\n  display: block;\n  width: 6px;\n  height: 6px;\n  border-radius: 50%;\n  background: #f3b000;\n}\n.brand {\n  display: flex;\n  align-items: center;\n  gap: 16px;\n  z-index: 10;\n  position: relative;\n}\n.logo {\n  width: 60px;\n  height: 60px;\n  flex-shrink: 0;\n  cursor: pointer;\n  border-radius: 50%;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  transition: transform 0.2s ease;\n}\n.logo:hover {\n  transform: scale(1.05);\n}\n.logo img {\n  width: 100%;\n  height: 100%;\n  object-fit: contain;\n  display: block;\n}\n.brand-content {\n  flex: 1;\n  min-width: 0;\n}\n.brand-content h1 {\n  font-size: clamp(24px, 2.4vw, 32px);\n  font-weight: 750;\n  color: #14213d;\n  letter-spacing: -0.5px;\n  line-height: 1.2;\n}\n.brand-content h1 span {\n  color: #f3b000;\n}\n.brand-content p {\n  margin-top: 5px;\n  color: #687184;\n  font-size: 13px;\n  line-height: 1.4;\n  font-weight: 500;\n}\n.message {\n  position: relative;\n  width: 100%;\n  box-sizing: border-box;\n  padding: 12px 32px 16px 48px;\n  margin: 0;\n  text-align: left;\n  z-index: 2;\n}\n.message h2 {\n  margin: 0 0 10px;\n  padding: 0;\n  font-size: 36px;\n  font-weight: 800;\n  line-height: 1.2;\n  letter-spacing: -0.5px;\n  color: #172B4D;\n}\n.message h2 span {\n  color: #F5A900;\n}\n.impact-tags {\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  justify-content: flex-start;\n  gap: 10px 18px;\n  margin: 0;\n  padding: 0;\n}\n.impact-tag {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  margin: 0;\n  padding: 0;\n  font-size: 13px;\n  line-height: 1.5;\n  white-space: nowrap;\n  color: #263858;\n}\n.impact-tag b {\n  color: #F5A900;\n  font-weight: 800;\n}\n.photo-slider {\n  position: absolute;\n  left: 0;\n  bottom: 0;\n  width: 100%;\n  height: 56%;\n  overflow: hidden;\n  z-index: 2;\n}\n.slides-track {\n  display: flex;\n  width: 100%;\n  height: 100%;\n  transition: transform 0.85s cubic-bezier(0.25, 1, 0.5, 1);\n  will-change: transform;\n}\n.slide {\n  flex: 0 0 100%;\n  width: 100%;\n  height: 100%;\n  position: relative;\n  overflow: hidden;\n}\n.slide img {\n  width: 100%;\n  height: 100%;\n  object-fit: cover;\n  object-position: center 35%;\n  display: block;\n}\n.wave {\n  position: absolute;\n  left: -5%;\n  bottom: -92%;\n  width: 110%;\n  height: 115%;\n  background: #ffd33d;\n  border-radius: 50%;\n  z-index: 5;\n  pointer-events: none;\n}\n.slider-dots {\n  position: absolute;\n  z-index: 10;\n  bottom: 16px;\n  left: 50%;\n  transform: translateX(-50%);\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}\n.slider-dots button {\n  width: 8px;\n  height: 8px;\n  padding: 0;\n  border: none;\n  border-radius: 50%;\n  background: rgba(255, 255, 255, 0.85);\n  cursor: pointer;\n  transition: all 0.25s ease;\n}\n.slider-dots button.active {\n  width: 22px;\n  border-radius: 10px;\n  background: #14213d;\n}\n.right {\n  width: 48%;\n  min-height: 100vh;\n  padding: 40px 32px;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  overflow-y: auto;\n  background:\n    radial-gradient(\n      circle at top left,\n      #fff8dc 0%,\n      transparent 55%),\n    #ffffff;\n}\n.right-container {\n  width: 100%;\n  max-width: 440px;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  margin: auto 0;\n}\n.logo-container {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n  margin-bottom: 20px;\n  padding: 8px 14px;\n  background: #ffffff;\n  border: 1px solid #f2e9cb;\n  border-radius: 40px;\n  box-shadow: 0 4px 16px rgba(20, 33, 61, 0.05);\n}\n.company-logo {\n  width: 60px;\n  height: 60px;\n  object-fit: contain;\n  border-radius: 50%;\n  display: block;\n}\n.logo-text {\n  display: flex;\n  flex-direction: column;\n  text-align: left;\n}\n.logo-sub {\n  font-size: 11.5px;\n  font-weight: 600;\n  color: #7b8494;\n  line-height: 1.25;\n}\n.logo-main {\n  font-size: 14.5px;\n  font-weight: 750;\n  color: #14213d;\n  line-height: 1.25;\n}\n.card {\n  width: 100%;\n  background: #ffffff;\n  border: 1.5px solid #f2ece0;\n  border-radius: 20px;\n  padding: 34px 34px 28px;\n  box-shadow: 0 16px 45px rgba(20, 33, 61, 0.07), 0 2px 8px rgba(20, 33, 61, 0.03);\n}\n.welcome {\n  color: #d49b00;\n  font-size: 11px;\n  font-weight: 750;\n  letter-spacing: 1px;\n  text-transform: uppercase;\n  margin-bottom: 4px;\n}\n.card h2 {\n  font-size: 28px;\n  font-weight: 800;\n  color: #14213d;\n  margin-bottom: 6px;\n  letter-spacing: -0.4px;\n}\n.desc {\n  color: #687184;\n  font-size: 13.5px;\n  line-height: 1.5;\n  margin-bottom: 22px;\n}\n.input-box {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  margin-bottom: 16px;\n}\n.input-box label {\n  display: block;\n  margin-bottom: 6px;\n  font-size: 13px;\n  font-weight: 600;\n  color: #2d3748;\n}\n.input-box input {\n  width: 100%;\n  height: 46px;\n  box-sizing: border-box;\n  padding: 0 14px;\n  border: 1.5px solid #e2e8f0;\n  border-radius: 10px;\n  font-size: 14.5px;\n  color: #1a202c;\n  background: #ffffff;\n  outline: none;\n  transition: border-color 0.2s ease, box-shadow 0.2s ease;\n}\n.input-box input::placeholder {\n  color: #a0aec0;\n}\n.input-box input:focus {\n  border-color: #f0b600;\n  box-shadow: 0 0 0 3px rgba(240, 182, 0, 0.16);\n}\n.password-wrapper {\n  position: relative;\n  display: flex;\n  align-items: center;\n  width: 100%;\n}\n.password-wrapper input {\n  padding-right: 44px;\n}\n.password-wrapper .eye {\n  position: absolute;\n  right: 12px;\n  top: 50%;\n  transform: translateY(-50%);\n  border: none;\n  background: transparent;\n  cursor: pointer;\n  color: #718096;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 4px;\n  border-radius: 4px;\n  outline: none;\n  transition: color 0.15s ease;\n}\n.password-wrapper .eye:hover {\n  color: #14213d;\n}\n.password-wrapper .eye:focus-visible {\n  outline: 2px solid #f4b400;\n}\n.remember-row {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  margin: 4px 0 20px;\n}\n.remember-label {\n  display: inline-flex;\n  align-items: center;\n  gap: 8px;\n  font-size: 13px;\n  color: #4a5568;\n  cursor: pointer;\n  -webkit-user-select: none;\n  user-select: none;\n}\n.remember-label input[type=checkbox] {\n  width: 15px;\n  height: 15px;\n  accent-color: #f5b400;\n  cursor: pointer;\n  margin: 0;\n}\n.forgot-link {\n  color: #d49b00;\n  font-size: 13px;\n  font-weight: 600;\n  text-decoration: none;\n  transition: color 0.15s ease;\n}\n.forgot-link:hover {\n  color: #b58400;\n  text-decoration: underline;\n}\n.login {\n  width: 100%;\n  height: 48px;\n  border: none;\n  border-radius: 10px;\n  background:\n    linear-gradient(\n      90deg,\n      #F9E662,\n      #ffd83e);\n  font-size: 15px;\n  font-weight: 700;\n  color: #172033;\n  cursor: pointer;\n  box-shadow: 0 8px 20px rgba(238, 180, 0, 0.24);\n  transition:\n    transform 0.15s ease,\n    box-shadow 0.15s ease,\n    background 0.2s ease;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  gap: 8px;\n}\n.login:hover {\n  transform: translateY(-2px);\n  box-shadow: 0 12px 24px rgba(238, 180, 0, 0.32);\n  background:\n    linear-gradient(\n      90deg,\n      #f5bc00,\n      #ffcf29);\n}\n.login:active {\n  transform: translateY(0);\n}\n.signup-text {\n  text-align: center;\n  margin-top: 10px;\n  color: #687184;\n  font-size: 13px;\n}\n.signup-text a {\n  color: #d49b00;\n  font-weight: 600;\n  text-decoration: none;\n  margin-left: 4px;\n}\n.signup-text a:hover {\n  text-decoration: underline;\n}\n.divider {\n  display: flex;\n  align-items: center;\n  gap: 14px;\n  margin: 18px 0 14px;\n  color: #a0aec0;\n  font-size: 11.5px;\n  font-weight: 600;\n}\n.divider span {\n  height: 1px;\n  background: #edf2f7;\n  flex: 1;\n}\n.footer {\n  text-align: center;\n  color: #8fa0b5;\n  font-size: 11.5px;\n  font-weight: 500;\n}\n.footer b {\n  color: #ffca28;\n  margin: 0 5px;\n}\n@media (max-width: 1050px) {\n  .page {\n    flex-direction: column;\n    min-height: 100vh;\n  }\n  .left {\n    width: 100%;\n    min-height: 480px;\n    height: 480px;\n    padding: 36px 5%;\n  }\n  .right {\n    width: 100%;\n    min-height: auto;\n    padding: 40px 24px 60px;\n  }\n  .right-container {\n    max-width: 440px;\n  }\n}\n@media (max-width: 600px) {\n  .left {\n    min-height: 420px;\n    height: 420px;\n    padding: 28px 20px;\n  }\n  .brand {\n    gap: 12px;\n  }\n  .logo {\n    width: 50px;\n    height: 50px;\n  }\n  .brand-content h1 {\n    font-size: 22px;\n  }\n  .brand-content p {\n    font-size: 11px;\n  }\n  .message {\n    margin-top: 24px;\n  }\n  .message h2 {\n    font-size: 26px;\n  }\n  .card {\n    padding: 26px 20px;\n    border-radius: 16px;\n  }\n  .card h2 {\n    font-size: 24px;\n  }\n  .right {\n    padding: 24px 16px 40px;\n  }\n}\n.login-error-banner {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n  background: #fef2f2;\n  border: 1.5px solid #fca5a5;\n  color: #dc2626;\n  padding: 10px 14px;\n  border-radius: 8px;\n  margin-bottom: 16px;\n  font-size: 13.5px;\n  font-weight: 500;\n  animation: bannerFadeIn 0.25s ease-out;\n}\n.login-error-banner svg {\n  flex-shrink: 0;\n  stroke: #dc2626;\n}\n@keyframes bannerFadeIn {\n  from {\n    opacity: 0;\n    transform: translateY(-4px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n.tamil-quote {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  gap: 5px;\n  margin-top: 20px;\n  padding: -10px 10px;\n  width: 100%;\n  box-sizing: border-box;\n  background:\n    linear-gradient(\n      135deg,\n      #fff4bd 0%,\n      #ffffff 50%,\n      #ffdf55 100%);\n  border-radius: 12px;\n  border: 1px solid #ffe38a;\n}\n.tamil-quote p {\n  font-size: 16px;\n  font-weight: 700;\n  line-height: 1.5;\n  text-align: center;\n  color: #111827;\n  margin: 0;\n}\n.lamp {\n  font-size: 8px;\n  flex-shrink: 0;\n}\n.site-header {\n  width: 100%;\n  min-height: 80px;\n  padding: 12px 5%;\n  box-sizing: border-box;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 20px;\n  background: #F9E662;\n  color: #172B4D;\n  position: relative;\n  z-index: 10;\n}\n.header-brand {\n  display: flex;\n  align-items: center;\n  gap: 16px;\n  margin-left: 0;\n}\n.header-brand img {\n  width: 52px;\n  height: 52px;\n  object-fit: contain;\n  flex-shrink: 0;\n}\n.header-brand h1 {\n  margin: 0;\n  font-size: clamp(22px, 2.5vw, 30px);\n  font-weight: 800;\n  color: #172B4D;\n  line-height: 1.15;\n}\n.header-brand h1 span {\n  color: #FFFFFF;\n}\n.header-brand p {\n  margin: 3px 0 0;\n  font-size: 13px;\n  color: #172B4D;\n}\n.header-badge {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n  padding: 8px 18px;\n  border-radius: 50px;\n  background: #FFFFFF;\n  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);\n  flex-shrink: 0;\n}\n.header-badge img {\n  width: 38px;\n  height: 38px;\n  object-fit: contain;\n}\n.header-badge div {\n  display: flex;\n  flex-direction: column;\n  gap: 2px;\n}\n.header-badge strong {\n  font-size: 13px;\n  color: #172B4D;\n  text-transform: capitalize;\n}\n.header-badge hr {\n  margin: 1px 0;\n  border: none;\n  border-top: 1px solid #e2e8f0;\n}\n.page {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  min-height: 100vh;\n  margin: 0;\n  padding: 0;\n  background: #ffffff;\n  box-sizing: border-box;\n}\n.content-layout {\n  display: grid;\n  grid-template-columns: 52% 48%;\n  align-items: center;\n  width: 100%;\n  flex: 1;\n  min-height: calc(100vh - 80px);\n  margin: 0;\n  padding: 0;\n  box-sizing: border-box;\n}\n.content-layout .left {\n  position: relative;\n  width: 100%;\n  min-width: 0;\n  height: 100%;\n  min-height: 540px;\n  display: flex;\n  flex-direction: column;\n  justify-content: space-between;\n  padding: 40px 6% 30px;\n  box-sizing: border-box;\n  overflow: hidden;\n  background: #ffffff;\n}\n.content-layout .right {\n  position: relative;\n  width: 100%;\n  min-width: 0;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 24px 6%;\n  box-sizing: border-box;\n  background: #ffffff;\n}\n.right-container {\n  width: 100%;\n  max-width: 440px;\n  margin: 0 auto;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 16px;\n  box-sizing: border-box;\n}\n.card {\n  width: 100%;\n  padding: 30px;\n  border-radius: 20px;\n  background: #ffffff;\n  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);\n  border: 1px solid #f1f3f7;\n  box-sizing: border-box;\n}\n@media (max-width: 992px) {\n  .content-layout {\n    grid-template-columns: 1fr;\n    min-height: auto;\n  }\n  .content-layout .left {\n    min-height: 380px;\n    height: auto;\n    padding: 30px 24px 10px;\n  }\n  .content-layout .left .photo-slider {\n    position: relative !important;\n    height: 220px !important;\n    margin-top: 16px !important;\n    bottom: auto !important;\n  }\n  .content-layout .left .yellow-curve {\n    display: none !important;\n  }\n  .content-layout .right {\n    padding: 24px 20px 48px;\n    height: auto;\n  }\n}\n@media (max-width: 768px) {\n  .site-header {\n    padding: 10px 16px;\n    min-height: 68px;\n  }\n  .header-brand {\n    gap: 12px;\n  }\n  .header-brand img {\n    width: 44px;\n    height: 44px;\n  }\n  .header-brand h1 {\n    font-size: 21px;\n  }\n  .header-brand p {\n    font-size: 11.5px;\n  }\n  .header-badge {\n    padding: 6px 14px;\n  }\n  .header-badge img {\n    width: 32px;\n    height: 32px;\n  }\n  .header-badge strong {\n    font-size: 11.5px;\n  }\n  .card {\n    padding: 22px 18px;\n    border-radius: 16px;\n  }\n}\n@media (max-width: 520px) {\n  .site-header {\n    padding: 8px 14px;\n    min-height: 60px;\n  }\n  .header-badge {\n    display: none;\n  }\n  .header-brand h1 {\n    font-size: 19px;\n  }\n  .content-layout .left {\n    min-height: auto;\n    padding: 20px 16px 0;\n  }\n  .content-layout .left .message h2 {\n    font-size: 24px;\n  }\n  .content-layout .left .photo-slider {\n    height: 180px !important;\n  }\n  .content-layout .right {\n    padding: 16px 14px 36px;\n  }\n  .card {\n    padding: 18px 14px;\n    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);\n  }\n  .tamil-quote p {\n    font-size: 13px;\n  }\n}\n.modal-overlay {\n  position: fixed;\n  inset: 0;\n  z-index: 9999;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  background: rgba(0, 0, 0, 0.6);\n  padding: 20px;\n}\n.signup-popup {\n  position: relative;\n  width: 100%;\n  max-width: 400px;\n  padding: 30px;\n  background: white;\n  border-radius: 18px;\n  box-sizing: border-box;\n}\n.signup-popup label {\n  display: block;\n  margin: 12px 0 5px;\n}\n.signup-popup input {\n  width: 100%;\n  height: 42px;\n  padding: 10px;\n  border: 1px solid #ddd;\n  border-radius: 8px;\n  box-sizing: border-box;\n}\n.close-btn {\n  position: absolute;\n  top: 8px;\n  right: 12px;\n  border: none;\n  background: none;\n  font-size: 26px;\n  cursor: pointer;\n}\n.signup-submit {\n  width: 100%;\n  margin-top: 20px;\n  padding: 12px;\n  border: none;\n  border-radius: 8px;\n  background: #ffd33d;\n  cursor: pointer;\n}\n.modal-overlay {\n  position: fixed;\n  inset: 0;\n  z-index: 9999;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  background: rgba(0, 0, 0, 0.60);\n  padding: 20px;\n  box-sizing: border-box;\n}\n.signup-popup {\n  position: relative;\n  width: 100%;\n  max-width: 440px;\n  max-height: 90vh;\n  overflow-y: auto;\n  padding: 30px;\n  background: #ffffff;\n  border-radius: 20px;\n  box-sizing: border-box;\n  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.20);\n}\n.signup-popup h2 {\n  margin: 0 0 20px;\n  color: #14213d;\n  font-size: 24px;\n  font-weight: 700;\n  text-align: left;\n}\n.signup-popup label {\n  display: block;\n  margin: 13px 0 6px;\n  color: #14213d;\n  font-size: 14px;\n  font-weight: 500;\n}\n.signup-popup input {\n  display: block;\n  width: 100%;\n  height: 43px;\n  padding: 10px;\n  border: 1px solid #d8dce5;\n  border-radius: 9px;\n  outline: none;\n  background: #ffffff;\n  color: #172033;\n  font-size: 14px;\n  box-sizing: border-box;\n  transition: border-color 0.2s, box-shadow 0.2s;\n}\n.signup-popup input:focus {\n  border-color: #ffc928;\n  box-shadow: 0 0 0 3px rgba(255, 201, 40, 0.18);\n}\n.password-field {\n  position: relative;\n  width: 100%;\n}\n.password-field input {\n  padding-right: 45px;\n}\n.password-eye {\n  position: absolute;\n  top: 50%;\n  right: 10px;\n  transform: translateY(-50%);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 4px;\n  border: none;\n  background: transparent;\n  color: #30384a;\n  cursor: pointer;\n}\n.close-btn {\n  position: absolute;\n  top: 12px;\n  right: 15px;\n  width: 30px;\n  height: 30px;\n  border: none;\n  border-radius: 50%;\n  background: transparent;\n  color: #111827;\n  font-size: 25px;\n  line-height: 1;\n  cursor: pointer;\n}\n.close-btn:hover {\n  background: #f1f2f5;\n}\n.signup-submit {\n  width: 100%;\n  min-height: 44px;\n  margin-top: 22px;\n  padding: 12px;\n  border: none;\n  border-radius: 9px;\n  background: #ffd33d;\n  color: #171717;\n  font-size: 15px;\n  font-weight: 600;\n  cursor: pointer;\n  transition: background 0.2s, transform 0.2s;\n}\n.signup-submit:hover {\n  background: #f5c21b;\n}\n.signup-submit:active {\n  transform: scale(0.98);\n}\n@media (max-width: 480px) {\n  .modal-overlay {\n    padding: 12px;\n  }\n  .signup-popup {\n    max-width: 100%;\n    max-height: 92vh;\n    padding: 25px 20px;\n    border-radius: 16px;\n  }\n  .signup-popup h2 {\n    font-size: 22px;\n  }\n}\n.forgot-description {\n  margin-bottom: 18px;\n  color: #666;\n  font-size: 14px;\n  line-height: 1.6;\n}\n.back-login {\n  width: 100%;\n  margin-top: 12px;\n  padding: 10px;\n  border: none;\n  background: transparent;\n  cursor: pointer;\n  color: #333;\n}\n.otp-section {\n  margin-top: 20px;\n  width: 100%;\n}\n.otp-section p {\n  font-size: 14px;\n  margin-bottom: 16px;\n}\n.otp-boxes {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  gap: 6px;\n  width: 100%;\n  margin-bottom: 20px;\n}\n.otp-input {\n  flex: 1;\n  min-width: 0;\n  max-width: 48px;\n  height: 48px;\n  text-align: center;\n  font-size: 20px;\n  font-weight: 600;\n  border: 1px solid #d5d9e2;\n  border-radius: 10px;\n  outline: none;\n  box-sizing: border-box;\n}\n.otp-input:focus {\n  border-color: #ffcc32;\n  box-shadow: 0 0 0 2px #ffcc3240;\n}\n@media (min-width: 993px) {\n  .left .photo-slider {\n    position: absolute !important;\n    left: 0 !important;\n    bottom: 0 !important;\n    width: 100% !important;\n    height: 60% !important;\n    overflow: hidden !important;\n    z-index: 2 !important;\n  }\n  .left .photo-slider img {\n    width: 100% !important;\n    height: 100% !important;\n    object-fit: cover !important;\n    object-position: center bottom !important;\n  }\n  .left .yellow-curve {\n    position: absolute !important;\n    left: -5% !important;\n    bottom: -45px !important;\n    width: 110% !important;\n    height: 170px !important;\n    z-index: 3 !important;\n  }\n}\n@media (max-width: 992px) {\n  .left .photo-slider {\n    position: relative !important;\n    width: 100% !important;\n    max-width: 440px !important;\n    height: 220px !important;\n    margin: 16px auto 0 !important;\n    overflow: hidden !important;\n    border-radius: 14px;\n    z-index: 2 !important;\n  }\n  .left .photo-slider img {\n    width: 100% !important;\n    height: 100% !important;\n    object-fit: contain !important;\n    object-position: center !important;\n  }\n  .left .yellow-curve {\n    display: none !important;\n  }\n}\n/*# sourceMappingURL=login.component.css.map */\n'] }]
-  }], () => [{ type: Router }], null);
+</div>`, styles: ['/* src/app/pages/login/login.component.css */\n* {\n  box-sizing: border-box;\n  margin: 0;\n  padding: 0;\n}\n:host {\n  display: block;\n  width: 100%;\n  min-height: 100vh;\n}\n.page {\n  width: 100%;\n  min-height: 100vh;\n  display: flex;\n  font-family:\n    -apple-system,\n    BlinkMacSystemFont,\n    "Segoe UI",\n    Roboto,\n    Helvetica,\n    Arial,\n    sans-serif;\n  background: #ffffff;\n  color: #172033;\n}\n.left {\n  width: 52%;\n  min-height: 100vh;\n  position: relative;\n  padding: 44px 6.5%;\n  display: flex;\n  flex-direction: column;\n  background: #ffffff;\n  overflow: hidden;\n}\n.dots {\n  position: absolute;\n  top: 36px;\n  right: 40px;\n  display: grid;\n  grid-template-columns: repeat(3, 6px);\n  gap: 8px;\n  opacity: 0.35;\n  z-index: 5;\n  pointer-events: none;\n}\n.dots i {\n  display: block;\n  width: 6px;\n  height: 6px;\n  border-radius: 50%;\n  background: #f3b000;\n}\n.brand {\n  display: flex;\n  align-items: center;\n  gap: 16px;\n  z-index: 10;\n  position: relative;\n}\n.logo {\n  width: 60px;\n  height: 60px;\n  flex-shrink: 0;\n  cursor: pointer;\n  border-radius: 50%;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  transition: transform 0.2s ease;\n}\n.logo:hover {\n  transform: scale(1.05);\n}\n.logo img {\n  width: 100%;\n  height: 100%;\n  object-fit: contain;\n  display: block;\n}\n.brand-content {\n  flex: 1;\n  min-width: 0;\n}\n.brand-content h1 {\n  font-size: clamp(24px, 2.4vw, 32px);\n  font-weight: 750;\n  color: #14213d;\n  letter-spacing: -0.5px;\n  line-height: 1.2;\n}\n.brand-content h1 span {\n  color: #f3b000;\n}\n.brand-content p {\n  margin-top: 5px;\n  color: #687184;\n  font-size: 13px;\n  line-height: 1.4;\n  font-weight: 500;\n}\n.message {\n  position: relative;\n  width: 100%;\n  box-sizing: border-box;\n  padding: 12px 32px 16px 48px;\n  margin: 0;\n  text-align: left;\n  z-index: 2;\n}\n.message h2 {\n  margin: 0 0 10px;\n  padding: 0;\n  font-size: 36px;\n  font-weight: 800;\n  line-height: 1.2;\n  letter-spacing: -0.5px;\n  color: #172B4D;\n}\n.message h2 span {\n  color: #F5A900;\n}\n.impact-tags {\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  justify-content: flex-start;\n  gap: 10px 18px;\n  margin: 0;\n  padding: 0;\n}\n.impact-tag {\n  display: inline-flex;\n  align-items: center;\n  gap: 5px;\n  margin: 0;\n  padding: 0;\n  font-size: 13px;\n  line-height: 1.5;\n  white-space: nowrap;\n  color: #263858;\n}\n.impact-tag b {\n  color: #F5A900;\n  font-weight: 800;\n}\n.photo-slider {\n  position: absolute;\n  left: 0;\n  bottom: 0;\n  width: 100%;\n  height: 56%;\n  overflow: hidden;\n  z-index: 2;\n}\n.slides-track {\n  display: flex;\n  width: 100%;\n  height: 100%;\n  transition: transform 0.85s cubic-bezier(0.25, 1, 0.5, 1);\n  will-change: transform;\n}\n.slide {\n  flex: 0 0 100%;\n  width: 100%;\n  height: 100%;\n  position: relative;\n  overflow: hidden;\n}\n.slide img {\n  width: 100%;\n  height: 100%;\n  object-fit: cover;\n  object-position: center 35%;\n  display: block;\n}\n.wave {\n  position: absolute;\n  left: -5%;\n  bottom: -92%;\n  width: 110%;\n  height: 115%;\n  background: #ffd33d;\n  border-radius: 50%;\n  z-index: 5;\n  pointer-events: none;\n}\n.slider-dots {\n  position: absolute;\n  z-index: 10;\n  bottom: 16px;\n  left: 50%;\n  transform: translateX(-50%);\n  display: flex;\n  align-items: center;\n  gap: 8px;\n}\n.slider-dots button {\n  width: 8px;\n  height: 8px;\n  padding: 0;\n  border: none;\n  border-radius: 50%;\n  background: rgba(255, 255, 255, 0.85);\n  cursor: pointer;\n  transition: all 0.25s ease;\n}\n.slider-dots button.active {\n  width: 22px;\n  border-radius: 10px;\n  background: #14213d;\n}\n.right {\n  width: 48%;\n  min-height: 100vh;\n  padding: 40px 32px;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  overflow-y: auto;\n  background:\n    radial-gradient(\n      circle at top left,\n      #fff8dc 0%,\n      transparent 55%),\n    #ffffff;\n}\n.right-container {\n  width: 100%;\n  max-width: 440px;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  margin: auto 0;\n}\n.logo-container {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n  margin-bottom: 20px;\n  padding: 8px 14px;\n  background: #ffffff;\n  border: 1px solid #f2e9cb;\n  border-radius: 40px;\n  box-shadow: 0 4px 16px rgba(20, 33, 61, 0.05);\n}\n.company-logo {\n  width: 60px;\n  height: 60px;\n  object-fit: contain;\n  border-radius: 50%;\n  display: block;\n}\n.logo-text {\n  display: flex;\n  flex-direction: column;\n  text-align: left;\n}\n.logo-sub {\n  font-size: 11.5px;\n  font-weight: 600;\n  color: #7b8494;\n  line-height: 1.25;\n}\n.logo-main {\n  font-size: 14.5px;\n  font-weight: 750;\n  color: #14213d;\n  line-height: 1.25;\n}\n.card {\n  width: 100%;\n  background: #ffffff;\n  border: 1.5px solid #f2ece0;\n  border-radius: 20px;\n  padding: 34px 34px 28px;\n  box-shadow: 0 16px 45px rgba(20, 33, 61, 0.07), 0 2px 8px rgba(20, 33, 61, 0.03);\n}\n.welcome {\n  color: #d49b00;\n  font-size: 11px;\n  font-weight: 750;\n  letter-spacing: 1px;\n  text-transform: uppercase;\n  margin-bottom: 4px;\n}\n.card h2 {\n  font-size: 28px;\n  font-weight: 800;\n  color: #14213d;\n  margin-bottom: 6px;\n  letter-spacing: -0.4px;\n}\n.desc {\n  color: #687184;\n  font-size: 13.5px;\n  line-height: 1.5;\n  margin-bottom: 22px;\n}\n.input-box {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  margin-bottom: 16px;\n}\n.input-box label {\n  display: block;\n  margin-bottom: 6px;\n  font-size: 13px;\n  font-weight: 600;\n  color: #2d3748;\n}\n.input-box input {\n  width: 100%;\n  height: 46px;\n  box-sizing: border-box;\n  padding: 0 14px;\n  border: 1.5px solid #e2e8f0;\n  border-radius: 10px;\n  font-size: 14.5px;\n  color: #1a202c;\n  background: #ffffff;\n  outline: none;\n  transition: border-color 0.2s ease, box-shadow 0.2s ease;\n}\n.input-box input::placeholder {\n  color: #a0aec0;\n}\n.input-box input:focus {\n  border-color: #f0b600;\n  box-shadow: 0 0 0 3px rgba(240, 182, 0, 0.16);\n}\n.password-wrapper {\n  position: relative;\n  display: flex;\n  align-items: center;\n  width: 100%;\n}\n.password-wrapper input {\n  padding-right: 44px;\n}\n.password-wrapper .eye {\n  position: absolute;\n  right: 12px;\n  top: 50%;\n  transform: translateY(-50%);\n  border: none;\n  background: transparent;\n  cursor: pointer;\n  color: #718096;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 4px;\n  border-radius: 4px;\n  outline: none;\n  transition: color 0.15s ease;\n}\n.password-wrapper .eye:hover {\n  color: #14213d;\n}\n.password-wrapper .eye:focus-visible {\n  outline: 2px solid #f4b400;\n}\n.remember-row {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  margin: 4px 0 20px;\n}\n.remember-label {\n  display: inline-flex;\n  align-items: center;\n  gap: 8px;\n  font-size: 13px;\n  color: #4a5568;\n  cursor: pointer;\n  -webkit-user-select: none;\n  user-select: none;\n}\n.remember-label input[type=checkbox] {\n  width: 15px;\n  height: 15px;\n  accent-color: #f5b400;\n  cursor: pointer;\n  margin: 0;\n}\n.forgot-link {\n  color: #d49b00;\n  font-size: 13px;\n  font-weight: 600;\n  text-decoration: none;\n  transition: color 0.15s ease;\n}\n.forgot-link:hover {\n  color: #b58400;\n  text-decoration: underline;\n}\n.login {\n  width: 100%;\n  height: 48px;\n  border: none;\n  border-radius: 10px;\n  background:\n    linear-gradient(\n      90deg,\n      #F9E662,\n      #ffd83e);\n  font-size: 15px;\n  font-weight: 700;\n  color: #172033;\n  cursor: pointer;\n  box-shadow: 0 8px 20px rgba(238, 180, 0, 0.24);\n  transition:\n    transform 0.15s ease,\n    box-shadow 0.15s ease,\n    background 0.2s ease;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  gap: 8px;\n}\n.login:hover {\n  transform: translateY(-2px);\n  box-shadow: 0 12px 24px rgba(238, 180, 0, 0.32);\n  background:\n    linear-gradient(\n      90deg,\n      #f5bc00,\n      #ffcf29);\n}\n.login:active {\n  transform: translateY(0);\n}\n.signup-text {\n  text-align: center;\n  margin-top: 10px;\n  color: #687184;\n  font-size: 13px;\n}\n.signup-text a {\n  color: #d49b00;\n  font-weight: 600;\n  text-decoration: none;\n  margin-left: 4px;\n}\n.signup-text a:hover {\n  text-decoration: underline;\n}\n.divider {\n  display: flex;\n  align-items: center;\n  gap: 14px;\n  margin: 18px 0 14px;\n  color: #a0aec0;\n  font-size: 11.5px;\n  font-weight: 600;\n}\n.divider span {\n  height: 1px;\n  background: #edf2f7;\n  flex: 1;\n}\n.footer {\n  text-align: center;\n  color: #8fa0b5;\n  font-size: 11.5px;\n  font-weight: 500;\n}\n.footer b {\n  color: #ffca28;\n  margin: 0 5px;\n}\n@media (max-width: 1050px) {\n  .page {\n    flex-direction: column;\n    min-height: 100vh;\n  }\n  .left {\n    width: 100%;\n    min-height: 480px;\n    height: 480px;\n    padding: 36px 5%;\n  }\n  .right {\n    width: 100%;\n    min-height: auto;\n    padding: 40px 24px 60px;\n  }\n  .right-container {\n    max-width: 440px;\n  }\n}\n@media (max-width: 600px) {\n  .left {\n    min-height: 420px;\n    height: 420px;\n    padding: 28px 20px;\n  }\n  .brand {\n    gap: 12px;\n  }\n  .logo {\n    width: 50px;\n    height: 50px;\n  }\n  .brand-content h1 {\n    font-size: 22px;\n  }\n  .brand-content p {\n    font-size: 11px;\n  }\n  .message {\n    margin-top: 24px;\n  }\n  .message h2 {\n    font-size: 26px;\n  }\n  .card {\n    padding: 26px 20px;\n    border-radius: 16px;\n  }\n  .card h2 {\n    font-size: 24px;\n  }\n  .right {\n    padding: 24px 16px 40px;\n  }\n}\n.login-error-banner {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n  background: #fef2f2;\n  border: 1.5px solid #fca5a5;\n  color: #dc2626;\n  padding: 10px 14px;\n  border-radius: 8px;\n  margin-bottom: 16px;\n  font-size: 13.5px;\n  font-weight: 500;\n  animation: bannerFadeIn 0.25s ease-out;\n}\n.login-error-banner svg {\n  flex-shrink: 0;\n  stroke: #dc2626;\n}\n.login-success-banner {\n  display: flex;\n  align-items: center;\n  gap: 10px;\n  background: #f0fdf4;\n  border: 1.5px solid #86efac;\n  color: #15803d;\n  padding: 10px 14px;\n  border-radius: 8px;\n  margin-bottom: 16px;\n  font-size: 13.5px;\n  font-weight: 500;\n  animation: bannerFadeIn 0.25s ease-out;\n}\n.login-success-banner svg {\n  flex-shrink: 0;\n  stroke: #16a34a;\n}\n@keyframes bannerFadeIn {\n  from {\n    opacity: 0;\n    transform: translateY(-4px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n.tamil-quote {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  gap: 5px;\n  margin-top: 20px;\n  padding: -10px 10px;\n  width: 100%;\n  box-sizing: border-box;\n  background:\n    linear-gradient(\n      135deg,\n      #fff4bd 0%,\n      #ffffff 50%,\n      #ffdf55 100%);\n  border-radius: 12px;\n  border: 1px solid #ffe38a;\n}\n.tamil-quote p {\n  font-size: 16px;\n  font-weight: 700;\n  line-height: 1.5;\n  text-align: center;\n  color: #111827;\n  margin: 0;\n}\n.lamp {\n  font-size: 8px;\n  flex-shrink: 0;\n}\n.site-header {\n  width: 100%;\n  min-height: 80px;\n  padding: 12px 5%;\n  box-sizing: border-box;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 20px;\n  background: #F9E662;\n  color: #172B4D;\n  position: relative;\n  z-index: 10;\n}\n.header-brand {\n  display: flex;\n  align-items: center;\n  gap: 16px;\n  margin-left: 0;\n}\n.header-brand img {\n  width: 52px;\n  height: 52px;\n  object-fit: contain;\n  flex-shrink: 0;\n}\n.header-brand h1 {\n  margin: 0;\n  font-size: clamp(22px, 2.5vw, 30px);\n  font-weight: 800;\n  color: #172B4D;\n  line-height: 1.15;\n}\n.header-brand h1 span {\n  color: #FFFFFF;\n}\n.header-brand p {\n  margin: 3px 0 0;\n  font-size: 13px;\n  color: #172B4D;\n}\n.header-badge {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n  padding: 8px 18px;\n  border-radius: 50px;\n  background: #FFFFFF;\n  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);\n  flex-shrink: 0;\n}\n.header-badge img {\n  width: 58px;\n  height: 58px;\n  object-fit: contain;\n}\n.header-badge div {\n  display: flex;\n  flex-direction: column;\n  gap: 2px;\n}\n.header-badge strong {\n  font-size: 13px;\n  color: #172B4D;\n  text-transform: capitalize;\n}\n.header-badge hr {\n  margin: 1px 0;\n  border: none;\n  border-top: 1px solid #e2e8f0;\n}\n.page {\n  display: flex;\n  flex-direction: column;\n  width: 100%;\n  min-height: 100vh;\n  margin: 0;\n  padding: 0;\n  background: #ffffff;\n  box-sizing: border-box;\n}\n.content-layout {\n  display: grid;\n  grid-template-columns: 52% 48%;\n  align-items: center;\n  width: 100%;\n  flex: 1;\n  min-height: calc(100vh - 80px);\n  margin: 0;\n  padding: 0;\n  box-sizing: border-box;\n}\n.content-layout .left {\n  position: relative;\n  width: 100%;\n  min-width: 0;\n  height: 100%;\n  min-height: 540px;\n  display: flex;\n  flex-direction: column;\n  justify-content: space-between;\n  padding: 40px 6% 30px;\n  box-sizing: border-box;\n  overflow: hidden;\n  background: #ffffff;\n}\n.content-layout .right {\n  position: relative;\n  width: 100%;\n  min-width: 0;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 24px 6%;\n  box-sizing: border-box;\n  background: #ffffff;\n}\n.right-container {\n  width: 100%;\n  max-width: 440px;\n  margin: 0 auto;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 16px;\n  box-sizing: border-box;\n}\n.card {\n  width: 100%;\n  padding: 30px;\n  border-radius: 20px;\n  background: #ffffff;\n  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);\n  border: 1px solid #f1f3f7;\n  box-sizing: border-box;\n}\n@media (max-width: 992px) {\n  .content-layout {\n    grid-template-columns: 1fr;\n    min-height: auto;\n  }\n  .content-layout .left {\n    min-height: 380px;\n    height: auto;\n    padding: 30px 24px 10px;\n  }\n  .content-layout .left .photo-slider {\n    position: relative !important;\n    height: 220px !important;\n    margin-top: 16px !important;\n    bottom: auto !important;\n  }\n  .content-layout .left .yellow-curve {\n    display: none !important;\n  }\n  .content-layout .right {\n    padding: 24px 20px 48px;\n    height: auto;\n  }\n}\n@media (max-width: 768px) {\n  .site-header {\n    padding: 10px 16px;\n    min-height: 68px;\n  }\n  .header-brand {\n    gap: 12px;\n  }\n  .header-brand img {\n    width: 44px;\n    height: 44px;\n  }\n  .header-brand h1 {\n    font-size: 21px;\n  }\n  .header-brand p {\n    font-size: 11.5px;\n  }\n  .header-badge {\n    padding: 6px 14px;\n  }\n  .header-badge img {\n    width: 32px;\n    height: 32px;\n  }\n  .header-badge strong {\n    font-size: 11.5px;\n  }\n  .card {\n    padding: 22px 18px;\n    border-radius: 16px;\n  }\n}\n@media (max-width: 520px) {\n  .site-header {\n    padding: 8px 14px;\n    min-height: 60px;\n  }\n  .header-badge {\n    display: none;\n  }\n  .header-brand h1 {\n    font-size: 19px;\n  }\n  .content-layout .left {\n    min-height: auto;\n    padding: 20px 16px 0;\n  }\n  .content-layout .left .message h2 {\n    font-size: 24px;\n  }\n  .content-layout .left .photo-slider {\n    height: 180px !important;\n  }\n  .content-layout .right {\n    padding: 16px 14px 36px;\n  }\n  .card {\n    padding: 18px 14px;\n    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);\n  }\n  .tamil-quote p {\n    font-size: 13px;\n  }\n}\n.modal-overlay {\n  position: fixed;\n  inset: 0;\n  z-index: 9999;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  background: rgba(0, 0, 0, 0.6);\n  padding: 20px;\n}\n.signup-popup {\n  position: relative;\n  width: 100%;\n  max-width: 400px;\n  padding: 30px;\n  background: white;\n  border-radius: 18px;\n  box-sizing: border-box;\n}\n.signup-popup label {\n  display: block;\n  margin: 12px 0 5px;\n}\n.signup-popup input {\n  width: 100%;\n  height: 42px;\n  padding: 10px;\n  border: 1px solid #ddd;\n  border-radius: 8px;\n  box-sizing: border-box;\n}\n.close-btn {\n  position: absolute;\n  top: 8px;\n  right: 12px;\n  border: none;\n  background: none;\n  font-size: 26px;\n  cursor: pointer;\n}\n.signup-submit {\n  width: 100%;\n  margin-top: 20px;\n  padding: 12px;\n  border: none;\n  border-radius: 8px;\n  background: #ffd33d;\n  cursor: pointer;\n}\n.modal-overlay {\n  position: fixed;\n  inset: 0;\n  z-index: 9999;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  background: rgba(0, 0, 0, 0.60);\n  padding: 20px;\n  box-sizing: border-box;\n}\n.signup-popup {\n  position: relative;\n  width: 100%;\n  max-width: 440px;\n  max-height: 90vh;\n  overflow-y: auto;\n  padding: 30px;\n  background: #ffffff;\n  border-radius: 20px;\n  box-sizing: border-box;\n  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.20);\n}\n.signup-popup h2 {\n  margin: 0 0 20px;\n  color: #14213d;\n  font-size: 24px;\n  font-weight: 700;\n  text-align: left;\n}\n.signup-popup label {\n  display: block;\n  margin: 13px 0 6px;\n  color: #14213d;\n  font-size: 14px;\n  font-weight: 500;\n}\n.signup-popup input {\n  display: block;\n  width: 100%;\n  height: 43px;\n  padding: 10px;\n  border: 1px solid #d8dce5;\n  border-radius: 9px;\n  outline: none;\n  background: #ffffff;\n  color: #172033;\n  font-size: 14px;\n  box-sizing: border-box;\n  transition: border-color 0.2s, box-shadow 0.2s;\n}\n.signup-popup input:focus {\n  border-color: #ffc928;\n  box-shadow: 0 0 0 3px rgba(255, 201, 40, 0.18);\n}\n.password-field {\n  position: relative;\n  width: 100%;\n}\n.password-field input {\n  padding-right: 45px;\n}\n.password-eye {\n  position: absolute;\n  top: 50%;\n  right: 10px;\n  transform: translateY(-50%);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  padding: 4px;\n  border: none;\n  background: transparent;\n  color: #30384a;\n  cursor: pointer;\n}\n.close-btn {\n  position: absolute;\n  top: 12px;\n  right: 15px;\n  width: 30px;\n  height: 30px;\n  border: none;\n  border-radius: 50%;\n  background: transparent;\n  color: #111827;\n  font-size: 25px;\n  line-height: 1;\n  cursor: pointer;\n}\n.close-btn:hover {\n  background: #f1f2f5;\n}\n.signup-submit {\n  width: 100%;\n  min-height: 44px;\n  margin-top: 22px;\n  padding: 12px;\n  border: none;\n  border-radius: 9px;\n  background: #ffd33d;\n  color: #171717;\n  font-size: 15px;\n  font-weight: 600;\n  cursor: pointer;\n  transition: background 0.2s, transform 0.2s;\n}\n.signup-submit:hover {\n  background: #f5c21b;\n}\n.signup-submit:active {\n  transform: scale(0.98);\n}\n@media (max-width: 480px) {\n  .modal-overlay {\n    padding: 12px;\n  }\n  .signup-popup {\n    max-width: 100%;\n    max-height: 92vh;\n    padding: 25px 20px;\n    border-radius: 16px;\n  }\n  .signup-popup h2 {\n    font-size: 22px;\n  }\n}\n.forgot-description {\n  margin-bottom: 18px;\n  color: #666;\n  font-size: 14px;\n  line-height: 1.6;\n}\n.back-login {\n  width: 100%;\n  margin-top: 12px;\n  padding: 10px;\n  border: none;\n  background: transparent;\n  cursor: pointer;\n  color: #333;\n}\n.otp-section {\n  margin-top: 20px;\n  width: 100%;\n}\n.otp-section p {\n  font-size: 14px;\n  margin-bottom: 16px;\n}\n.otp-boxes {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  gap: 6px;\n  width: 100%;\n  margin-bottom: 20px;\n}\n.otp-input {\n  flex: 1;\n  min-width: 0;\n  max-width: 48px;\n  height: 48px;\n  text-align: center;\n  font-size: 20px;\n  font-weight: 600;\n  border: 1px solid #d5d9e2;\n  border-radius: 10px;\n  outline: none;\n  box-sizing: border-box;\n}\n.otp-input:focus {\n  border-color: #ffcc32;\n  box-shadow: 0 0 0 2px #ffcc3240;\n}\n@media (min-width: 993px) {\n  .left .photo-slider {\n    position: absolute !important;\n    left: 0 !important;\n    bottom: 0 !important;\n    width: 100% !important;\n    height: 60% !important;\n    overflow: hidden !important;\n    z-index: 2 !important;\n  }\n  .left .photo-slider img {\n    width: 100% !important;\n    height: 100% !important;\n    object-fit: cover !important;\n    object-position: center bottom !important;\n  }\n  .left .yellow-curve {\n    position: absolute !important;\n    left: -5% !important;\n    bottom: -45px !important;\n    width: 110% !important;\n    height: 170px !important;\n    z-index: 3 !important;\n  }\n}\n@media (max-width: 992px) {\n  .left .photo-slider {\n    position: relative !important;\n    width: 100% !important;\n    max-width: 440px !important;\n    height: 220px !important;\n    margin: 16px auto 0 !important;\n    overflow: hidden !important;\n    border-radius: 14px;\n    z-index: 2 !important;\n  }\n  .left .photo-slider img {\n    width: 100% !important;\n    height: 100% !important;\n    object-fit: contain !important;\n    object-position: center !important;\n  }\n  .left .yellow-curve {\n    display: none !important;\n  }\n}\n/*# sourceMappingURL=login.component.css.map */\n'] }]
+  }], () => [{ type: Router }, { type: AuthService }, { type: ChangeDetectorRef }], null);
 })();
 (() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(LoginComponent, { className: "LoginComponent", filePath: "src/app/pages/login/login.component.ts", lineNumber: 18 });
+  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(LoginComponent, { className: "LoginComponent", filePath: "src/app/pages/login/login.component.ts", lineNumber: 20 });
 })();
 
 // src/app/layout/sidebar/sidebar.ts
@@ -1328,27 +1543,27 @@ var routes = [
     children: [
       {
         path: "dashboard",
-        loadComponent: () => import("./chunk-QPWOCQJ7.js").then((m) => m.Dashboard)
+        loadComponent: () => import("./chunk-JEEQGSHI.js").then((m) => m.Dashboard)
       },
       {
         path: "products",
-        loadComponent: () => import("./chunk-5PVHKU7C.js").then((m) => m.Products)
+        loadComponent: () => import("./chunk-7PLCIA2Q.js").then((m) => m.Products)
       },
       {
         path: "lcc",
-        loadComponent: () => import("./chunk-AUOK72OC.js").then((m) => m.LccComponent)
+        loadComponent: () => import("./chunk-NU3F7QUI.js").then((m) => m.LccComponent)
       },
       {
         path: "reports",
-        loadComponent: () => import("./chunk-QR5QZ4D4.js").then((m) => m.ReportsComponent)
+        loadComponent: () => import("./chunk-COJLFM5P.js").then((m) => m.ReportsComponent)
       },
       {
         path: "distribution",
-        loadComponent: () => import("./chunk-KOCPJZBB.js").then((m) => m.Distribution)
+        loadComponent: () => import("./chunk-YCYJUHHL.js").then((m) => m.Distribution)
       },
       {
         path: "members",
-        loadComponent: () => import("./chunk-L6KBFMEW.js").then((m) => m.MembersComponent)
+        loadComponent: () => import("./chunk-VCMUTL6R.js").then((m) => m.MembersComponent)
       }
     ]
   },
@@ -1387,5 +1602,5 @@ var App = class _App {
 
 // src/main.ts
 bootstrapApplication(App, appConfig).catch((err) => console.error(err));
-//# debugId=8a15469a-a293-5cea-9c2e-66eb8bbd8ebe
+//# debugId=86079d07-5602-55ae-984a-27f2cc627112
 //# sourceMappingURL=main.js.map
